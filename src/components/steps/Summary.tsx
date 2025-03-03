@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { RegistrationData } from '@/lib/types';
+import { RegistrationData, RoomType } from '@/lib/types';
 import { format } from 'date-fns';
 import {
   Table,
@@ -26,7 +26,8 @@ const Summary: React.FC<SummaryProps> = ({ allData }) => {
 
   // Calculate cost summaries
   const accommodationCost = accommodation ? 
-    accommodation.accommodation.price[accommodation.roomType] * 
+    // Get price based on room type
+    (accommodation.accommodation.pricePerNight?.[accommodation.roomType] || 0) * 
     (accommodation.checkOut.getTime() - accommodation.checkIn.getTime()) / (1000 * 60 * 60 * 24) : 0;
   
   const mealsCost = meals.reduce((total, dayMeal) => 
@@ -57,6 +58,13 @@ const Summary: React.FC<SummaryProps> = ({ allData }) => {
   );
 
   const remainingCost = totalCost - totalSponsorContribution;
+
+  const getRoomTypeName = (type: RoomType): string => {
+    if (type === 'single') return 'Egyágyas';
+    if (type === 'double') return 'Kétágyas';
+    if (type === 'suite') return 'Lakosztály';
+    return 'Apartman';
+  };
 
   return (
     <motion.div 
@@ -126,15 +134,11 @@ const Summary: React.FC<SummaryProps> = ({ allData }) => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Szobatípus:</span>
-                  <span>{
-                    accommodation.roomType === 'single' ? 'Egyágyas' : 
-                    accommodation.roomType === 'double' ? 'Kétágyas' : 
-                    accommodation.roomType === 'suite' ? 'Lakosztály' : 'Apartman'
-                  }</span>
+                  <span>{getRoomTypeName(accommodation.roomType)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Vendégek száma:</span>
-                  <span>{accommodation.guests} fő</span>
+                  <span>{accommodation.numberOfGuests} fő</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Érkezés:</span>
@@ -233,9 +237,9 @@ const Summary: React.FC<SummaryProps> = ({ allData }) => {
                     <TableRow key={index}>
                       <TableCell className="font-medium">{program.name}</TableCell>
                       <TableCell>
-                        {format(program.date, 'yyyy. MM. dd.')} {program.time}
+                        {format(program.date, 'yyyy. MM. dd.')} {format(program.date, 'HH:mm')}
                       </TableCell>
-                      <TableCell>{program.duration} óra</TableCell>
+                      <TableCell>{program.duration}</TableCell>
                       <TableCell className="text-right">{program.price.toLocaleString()} Ft</TableCell>
                     </TableRow>
                   ))}

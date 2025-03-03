@@ -1,0 +1,45 @@
+
+import React from 'react';
+import AnimatedTransition from '@/components/UI/AnimatedTransition';
+import { Step } from '@/lib/types';
+
+type StepContainerProps = {
+  currentStep: Step;
+  registrationData: any;
+  updateData: (data: any) => void;
+  checkIn?: Date;
+  checkOut?: Date;
+  allData: any;
+};
+
+const StepContainer: React.FC<StepContainerProps> = ({
+  currentStep,
+  registrationData,
+  updateData,
+  checkIn,
+  checkOut,
+  allData
+}) => {
+  const CurrentStepComponent = currentStep.component;
+
+  return (
+    <div className="bg-card rounded-lg shadow-md p-6 md:p-8 mb-8">
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold mb-1">{currentStep.label}</h2>
+        <p className="text-muted-foreground">{currentStep.description}</p>
+      </div>
+
+      <AnimatedTransition key={currentStep.id} isVisible={true}>
+        <CurrentStepComponent
+          data={registrationData}
+          updateData={updateData}
+          checkIn={checkIn}
+          checkOut={checkOut}
+          allData={allData}
+        />
+      </AnimatedTransition>
+    </div>
+  );
+};
+
+export default StepContainer;

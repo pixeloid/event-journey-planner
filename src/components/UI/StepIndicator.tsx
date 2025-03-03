@@ -6,9 +6,14 @@ import { cn } from '@/lib/utils';
 type StepIndicatorProps = {
   steps: string[];
   currentStep: number;
+  onStepClick?: (index: number) => void;
 };
 
-const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep }) => {
+const StepIndicator: React.FC<StepIndicatorProps> = ({ 
+  steps, 
+  currentStep,
+  onStepClick 
+}) => {
   return (
     <div className="w-full py-6">
       <div className="flex justify-between">
@@ -18,8 +23,10 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep }) => 
             className={cn(
               "step-item",
               currentStep === index && "active",
-              currentStep > index && "complete"
+              currentStep > index && "complete",
+              onStepClick && "cursor-pointer"
             )}
+            onClick={() => onStepClick && onStepClick(index)}
           >
             <div className="step-counter">
               {currentStep > index ? (
