@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { MealOption, SelectedMeal } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format, addDays } from 'date-fns';
 import { UtensilsCrossedIcon, CupSodaIcon, SaladIcon, ChefHatIcon } from 'lucide-react';
@@ -46,10 +45,19 @@ type MealsProps = {
   data: SelectedMeal[];
   checkIn: Date;
   checkOut: Date;
-  updateMeals: (meals: SelectedMeal[]) => void;
+  updateData: (meals: SelectedMeal[]) => void;
 };
 
-const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateMeals }) => {
+const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateData }) => {
+  // Ensure checkIn and checkOut are valid Date objects
+  if (!(checkIn instanceof Date) || !(checkOut instanceof Date) || isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
+    return (
+      <div className="text-center p-8">
+        <p className="text-muted-foreground">Kérjük, először válasszon ki egy szállást és adja meg a foglalás dátumait.</p>
+      </div>
+    );
+  }
+
   const [activeTab, setActiveTab] = useState<string>(format(checkIn, 'yyyy-MM-dd'));
   
   // Generate array of days between checkIn and checkOut
@@ -82,7 +90,7 @@ const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateMeals }) =
         updatedMeals[dayIndex].meals.push(meal);
       }
       
-      updateMeals(updatedMeals);
+      updateData(updatedMeals);
     }
   };
 

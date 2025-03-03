@@ -22,6 +22,12 @@ const StepContainer: React.FC<StepContainerProps> = ({
 }) => {
   const CurrentStepComponent = currentStep.component;
 
+  // Only render certain components if we have the required props
+  const shouldRenderWithDates = 
+    currentStep.id === 'meals' && 
+    checkIn instanceof Date && 
+    checkOut instanceof Date;
+
   return (
     <div className="bg-card rounded-lg shadow-md p-6 md:p-8 mb-8">
       <div className="mb-6">
@@ -30,13 +36,21 @@ const StepContainer: React.FC<StepContainerProps> = ({
       </div>
 
       <AnimatedTransition key={currentStep.id} isVisible={true}>
-        <CurrentStepComponent
-          data={registrationData}
-          updateData={updateData}
-          checkIn={checkIn}
-          checkOut={checkOut}
-          allData={allData}
-        />
+        {shouldRenderWithDates ? (
+          <CurrentStepComponent
+            data={registrationData}
+            updateData={updateData}
+            checkIn={checkIn}
+            checkOut={checkOut}
+            allData={allData}
+          />
+        ) : (
+          <CurrentStepComponent
+            data={registrationData}
+            updateData={updateData}
+            allData={allData}
+          />
+        )}
       </AnimatedTransition>
     </div>
   );
