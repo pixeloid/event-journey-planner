@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { RegistrationData, PersonalData, SelectedAccommodation, SelectedMeal, SelectedProgram, SponsorCompany } from '@/lib/types';
 
 // Default personal data
@@ -21,6 +21,9 @@ const initialRegistrationData: RegistrationData = {
   sponsors: []
 };
 
+// Storage key for localStorage
+const STORAGE_KEY = 'event_registration_data';
+
 type RegistrationContextType = {
   registrationData: RegistrationData;
   updatePersonalInfo: (data: PersonalData) => void;
@@ -36,8 +39,68 @@ type RegistrationContextType = {
 const RegistrationContext = createContext<RegistrationContextType | undefined>(undefined);
 
 export const RegistrationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [registrationData, setRegistrationData] = useState<RegistrationData>(initialRegistrationData);
-  const [formSubmitted, setFormSubmitted] = useState(false);
+  // Initialize state from localStorage or use default values
+  const loadInitialState = (): { data: RegistrationData, submitted: boolean } => {
+    if (typeof window === 'undefined') {
+      return { data: initialRegistrationData, submitted: false };
+    }
+    
+    try {
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        
+        // Restore date objects which were stringified in JSON
+        if (parsedData.data?.accommodation?.checkIn) {
+          parsedData.data.accommodation.checkIn = new Date(parsedData.data.accommodation.checkIn);
+        }
+        if (parsedData.data?.accommodation?.checkOut) {
+          parsedData.data.accommodation.checkOut = new Date(parsedData.data.accommodation.checkOut);
+        }
+        
+        // Restore dates in meals array
+        if (parsedData.data?.meals?.length) {
+          parsedData.data.meals = parsedData.data.meals.map((meal: any) => ({
+            ...meal,
+            date: new Date(meal.date)
+          }));
+        }
+        
+        // Restore dates in programs array
+        if (parsedData.data?.programs?.length) {
+          parsedData.data.programs = parsedData.data.programs.map((program: any) => ({
+            ...program,
+            date: new Date(program.date)
+          }));
+        }
+        
+        return {
+          data: parsedData.data,
+          submitted: parsedData.submitted || false
+        };
+      }
+    } catch (error) {
+      console.error('Error loading data from localStorage:', error);
+    }
+    
+    return { data: initialRegistrationData, submitted: false };
+  };
+  
+  const initialState = loadInitialState();
+  const [registrationData, setRegistrationData] = useState<RegistrationData>(initialState.data);
+  const [formSubmitted, setFormSubmitted] = useState(initialState.submitted);
+
+  // Save to localStorage whenever state changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        data: registrationData,
+        submitted: formSubmitted
+      }));
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
+  }, [registrationData, formSubmitted]);
 
   const updatePersonalInfo = (data: PersonalData) => {
     setRegistrationData(prev => ({ ...prev, personalInfo: data }));
@@ -62,6 +125,7 @@ export const RegistrationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const resetForm = () => {
     setRegistrationData(initialRegistrationData);
     setFormSubmitted(false);
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   return (

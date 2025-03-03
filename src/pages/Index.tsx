@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { registrationSteps } from '@/config/registrationSteps';
 import StepIndicator from '@/components/UI/StepIndicator';
@@ -8,8 +8,23 @@ import FormNavigation from '@/components/registration/FormNavigation';
 import RegistrationSuccess from '@/components/registration/RegistrationSuccess';
 import { RegistrationProvider, useRegistration } from '@/contexts/RegistrationContext';
 
+// Storage key for current step
+const STEP_STORAGE_KEY = 'event_registration_step';
+
 const RegistrationForm = () => {
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  // Load step from localStorage or start at 0
+  const getInitialStep = () => {
+    if (typeof window === 'undefined') return 0;
+    
+    try {
+      const savedStep = localStorage.getItem(STEP_STORAGE_KEY);
+      return savedStep ? parseInt(savedStep, 10) : 0;
+    } catch (e) {
+      return 0;
+    }
+  };
+
+  const [currentStepIndex, setCurrentStepIndex] = useState(getInitialStep());
   const { 
     registrationData, 
     updatePersonalInfo, 
@@ -20,6 +35,15 @@ const RegistrationForm = () => {
     formSubmitted,
     setFormSubmitted
   } = useRegistration();
+
+  // Save current step to localStorage when it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STEP_STORAGE_KEY, currentStepIndex.toString());
+    } catch (error) {
+      console.error('Error saving step to localStorage:', error);
+    }
+  }, [currentStepIndex]);
 
   const currentStep = registrationSteps[currentStepIndex];
   const isFirstStep = currentStepIndex === 0;
@@ -40,7 +64,8 @@ const RegistrationForm = () => {
   const handleSubmit = () => {
     console.log('Form submitted with data:', registrationData);
     setFormSubmitted(true);
-    // Here you would typically send the data to your backend
+    // Clear the step from localStorage when form is submitted
+    localStorage.removeItem(STEP_STORAGE_KEY);
   };
 
   // Determine which update function to use based on current step

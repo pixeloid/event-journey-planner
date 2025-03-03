@@ -26,7 +26,9 @@ const StepContainer: React.FC<StepContainerProps> = ({
   const shouldRenderWithDates = 
     currentStep.id === 'meals' && 
     checkIn instanceof Date && 
-    checkOut instanceof Date;
+    checkOut instanceof Date && 
+    !isNaN(checkIn.getTime()) && 
+    !isNaN(checkOut.getTime());
 
   return (
     <div className="bg-card rounded-lg shadow-md p-6 md:p-8 mb-8">
