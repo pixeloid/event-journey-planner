@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
-import { RegistrationData, RoomType } from '@/lib/types';
+import { RegistrationData } from '@/lib/types';
 import { format } from 'date-fns';
 import {
   Table,
@@ -26,9 +25,10 @@ const Summary: React.FC<SummaryProps> = ({ allData }) => {
 
   // Calculate cost summaries
   const accommodationCost = accommodation ? 
-    // Get price based on room type
-    (accommodation.accommodation.pricePerNight?.[accommodation.roomType] || 0) * 
-    (accommodation.checkOut.getTime() - accommodation.checkIn.getTime()) / (1000 * 60 * 60 * 24) : 0;
+    (accommodation.accommodation && accommodation.roomType ? 
+      accommodation.accommodation.roomTypes.find(room => room.id === accommodation.roomType)?.pricePerNight || 0 : 0) * 
+    (accommodation.checkOut && accommodation.checkIn ? 
+      (accommodation.checkOut.getTime() - accommodation.checkIn.getTime()) / (1000 * 60 * 60 * 24) : 0) : 0;
   
   const mealsCost = meals.reduce((total, dayMeal) => 
     total + dayMeal.meals.reduce((sum, meal) => sum + meal.price, 0), 0);
@@ -59,7 +59,7 @@ const Summary: React.FC<SummaryProps> = ({ allData }) => {
 
   const remainingCost = totalCost - totalSponsorContribution;
 
-  const getRoomTypeName = (type: RoomType): string => {
+  const getRoomTypeName = (type: string): string => {
     if (type === 'single') return 'Egyágyas';
     if (type === 'double') return 'Kétágyas';
     if (type === 'suite') return 'Lakosztály';
@@ -130,11 +130,11 @@ const Summary: React.FC<SummaryProps> = ({ allData }) => {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Szálláshely:</span>
-                  <span className="font-medium">{accommodation.accommodation.name}</span>
+                  <span className="font-medium">{accommodation.accommodation?.name}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Szobatípus:</span>
-                  <span>{getRoomTypeName(accommodation.roomType)}</span>
+                  <span>{accommodation.roomType ? getRoomTypeName(accommodation.roomType) : ''}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Vendégek száma:</span>
@@ -142,11 +142,11 @@ const Summary: React.FC<SummaryProps> = ({ allData }) => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Érkezés:</span>
-                  <span>{format(accommodation.checkIn, 'yyyy. MM. dd.')}</span>
+                  <span>{accommodation.checkIn ? format(accommodation.checkIn, 'yyyy. MM. dd.') : ''}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Távozás:</span>
-                  <span>{format(accommodation.checkOut, 'yyyy. MM. dd.')}</span>
+                  <span>{accommodation.checkOut ? format(accommodation.checkOut, 'yyyy. MM. dd.') : ''}</span>
                 </div>
                 <div className="flex justify-between font-medium pt-2 border-t border-border mt-2">
                   <span>Összesen:</span>

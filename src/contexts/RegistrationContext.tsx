@@ -30,6 +30,7 @@ type RegistrationContextType = {
   updateSponsors: (data: SponsorCompany[]) => void;
   formSubmitted: boolean;
   setFormSubmitted: (submitted: boolean) => void;
+  resetForm: () => void;
 };
 
 const RegistrationContext = createContext<RegistrationContextType | undefined>(undefined);
@@ -57,6 +58,11 @@ export const RegistrationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const updateSponsors = (data: SponsorCompany[]) => {
     setRegistrationData(prev => ({ ...prev, sponsors: data }));
   };
+  
+  const resetForm = () => {
+    setRegistrationData(initialRegistrationData);
+    setFormSubmitted(false);
+  };
 
   return (
     <RegistrationContext.Provider value={{
@@ -67,7 +73,8 @@ export const RegistrationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       updatePrograms,
       updateSponsors,
       formSubmitted,
-      setFormSubmitted
+      setFormSubmitted,
+      resetForm
     }}>
       {children}
     </RegistrationContext.Provider>
