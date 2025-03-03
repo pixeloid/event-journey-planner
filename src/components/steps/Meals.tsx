@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { MealOption, SelectedMeal } from '@/lib/types';
 import { Tabs } from '@/components/ui/tabs';
 import { format, addDays } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { CalendarIcon } from 'lucide-react';
 
 import DaySelector from '@/components/meals/DaySelector';
 import DayContent from '@/components/meals/DayContent';
@@ -20,15 +22,38 @@ type MealsProps = {
 
 const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateData, allData }) => {
   // Extra validation to ensure we have valid dates
-  if (!checkIn || !checkOut || !(checkIn instanceof Date) || !(checkOut instanceof Date) || 
-      isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
+  const isValidDate = (date: any): boolean => {
+    return date instanceof Date && !isNaN(date.getTime());
+  };
+
+  if (!checkIn || !checkOut || !isValidDate(checkIn) || !isValidDate(checkOut)) {
     return (
-      <div className="text-center p-8">
-        <p className="text-muted-foreground">Kérjük, először válasszon ki egy szállást és adja meg a foglalás dátumait.</p>
+      <div className="flex flex-col items-center p-8 space-y-4">
+        <div className="text-center max-w-md">
+          <CalendarIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium mb-2">Hiányzó dátumok</h3>
+          <p className="text-muted-foreground mb-4">
+            Kérjük, először adja meg a foglalás dátumait a Szállás lépésben. Az étkezések kiválasztásához szükséges a foglalás kezdő és záró dátuma.
+          </p>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              // Find the accommodation step index in the registration steps
+              const accommodationStepIndex = 1; // Assuming it's the second step (index 1)
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('event_registration_step', accommodationStepIndex.toString());
+                window.location.reload();
+              }
+            }}
+          >
+            Vissza a Szállás lépéshez
+          </Button>
+        </div>
       </div>
     );
   }
 
+  // Continue with the normal component logic for valid dates
   const [activeTab, setActiveTab] = useState<string>(format(checkIn, 'yyyy-MM-dd'));
   
   // Generate array of days between checkIn and checkOut

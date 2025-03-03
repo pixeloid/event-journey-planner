@@ -45,6 +45,17 @@ const RegistrationForm = () => {
     }
   }, [currentStepIndex]);
 
+  // Check if we have a valid accommodation with dates
+  const isValidDate = (date: any): boolean => {
+    return date instanceof Date && !isNaN(date.getTime());
+  };
+  
+  const hasValidAccommodationDates = 
+    registrationData.accommodation?.checkIn && 
+    registrationData.accommodation?.checkOut &&
+    isValidDate(registrationData.accommodation.checkIn) &&
+    isValidDate(registrationData.accommodation.checkOut);
+
   const currentStep = registrationSteps[currentStepIndex];
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === registrationSteps.length - 1;
@@ -128,8 +139,8 @@ const RegistrationForm = () => {
           currentStep={currentStep}
           registrationData={getCurrentStepData()}
           updateData={getCurrentUpdateFunction()}
-          checkIn={registrationData.accommodation?.checkIn}
-          checkOut={registrationData.accommodation?.checkOut}
+          checkIn={registrationData.accommodation?.checkIn || null}
+          checkOut={registrationData.accommodation?.checkOut || null}
           allData={registrationData}
         />
 
@@ -139,6 +150,7 @@ const RegistrationForm = () => {
           goToPreviousStep={goToPreviousStep}
           goToNextStep={goToNextStep}
           handleSubmit={handleSubmit}
+          isNextDisabled={currentStep.id === 'meals' && !hasValidAccommodationDates}
         />
       </div>
     </div>

@@ -22,8 +22,17 @@ const StepContainer: React.FC<StepContainerProps> = ({
 }) => {
   const CurrentStepComponent = currentStep.component;
 
+  // Validate dates to ensure they are valid Date objects
+  const isValidDate = (date: any): boolean => {
+    return date instanceof Date && !isNaN(date.getTime());
+  };
+
+  // Create validated check-in and check-out dates
+  const validCheckIn = checkIn && isValidDate(checkIn) ? checkIn : null;
+  const validCheckOut = checkOut && isValidDate(checkOut) ? checkOut : null;
+
   // Pass props based on the current step
-  if (currentStep.id === 'meals' && checkIn instanceof Date && checkOut instanceof Date) {
+  if (currentStep.id === 'meals') {
     return (
       <div className="bg-card rounded-lg shadow-md p-6 md:p-8 mb-8">
         <div className="mb-6">
@@ -35,8 +44,8 @@ const StepContainer: React.FC<StepContainerProps> = ({
           <CurrentStepComponent
             data={registrationData}
             updateData={updateData}
-            checkIn={checkIn}
-            checkOut={checkOut}
+            checkIn={validCheckIn}
+            checkOut={validCheckOut}
             allData={allData}
           />
         </AnimatedTransition>
@@ -54,6 +63,7 @@ const StepContainer: React.FC<StepContainerProps> = ({
           <CurrentStepComponent
             selectedPrograms={registrationData}
             updatePrograms={updateData}
+            allData={allData}
           />
         </AnimatedTransition>
       </div>
