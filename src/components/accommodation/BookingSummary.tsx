@@ -16,6 +16,17 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
   checkIn,
   checkOut
 }) => {
+  // Ensure the dates have valid time values before formatting
+  const formatDate = (date: Date) => {
+    if (date instanceof Date && !isNaN(date.getTime())) {
+      return format(date, "yyyy. MMMM d.");
+    }
+    return "Invalid date";
+  };
+
+  const checkInFormatted = formatDate(checkIn);
+  const checkOutFormatted = formatDate(checkOut);
+
   return (
     <div className="mt-8 p-4 bg-primary/10 border border-primary/20 rounded-lg">
       <div className="flex items-center justify-between">
@@ -25,7 +36,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
             {numberOfNights} éjszaka × {roomType.pricePerNight.toLocaleString()} Ft
           </p>
           <p className="text-sm text-muted-foreground">
-            {format(checkIn, "yyyy. MMMM d.")} - {format(checkOut, "yyyy. MMMM d.")}
+            {checkInFormatted} - {checkOutFormatted}
           </p>
         </div>
         <div className="text-right">
