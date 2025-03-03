@@ -53,11 +53,24 @@ const StepContainer: React.FC<StepContainerProps> = ({
           />
         );
       case 'cost':
+        // Calculate totals for accommodation, meals, and programs
+        const accommodationTotal = allData.accommodation?.roomType?.pricePerNight * 
+                                  (allData.accommodation?.numberOfNights || 0) * 
+                                  (allData.accommodation?.numberOfGuests || 1) || 0;
+        
+        const mealsTotal = allData.meals?.reduce((total: number, meal: any) => 
+          total + (meal.meals?.reduce((mealTotal: number, m: any) => mealTotal + (m.price || 0), 0) || 0), 0) || 0;
+        
+        const programsTotal = allData.programs?.reduce((total: number, program: any) => 
+          total + (program.price || 0), 0) || 0;
+        
         return (
           <CurrentStepComponent
-            sponsors={registrationData || []}
-            updateSponsors={updateData}
-            allData={allData}
+            distributions={registrationData || []}
+            updateDistributions={updateData}
+            accommodationTotal={accommodationTotal}
+            mealsTotal={mealsTotal}
+            programsTotal={programsTotal}
           />
         );
       case 'summary':

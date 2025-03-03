@@ -17,10 +17,10 @@ type CostSharingProps = {
 };
 
 const CostSharing: React.FC<CostSharingProps> = ({ 
-  distributions, 
-  accommodationTotal, 
-  mealsTotal, 
-  programsTotal, 
+  distributions = [], // Provide default empty array
+  accommodationTotal = 0, // Provide default values
+  mealsTotal = 0,
+  programsTotal = 0,
   updateDistributions 
 }) => {
   const [newCompanyName, setNewCompanyName] = useState('');
@@ -86,7 +86,7 @@ const CostSharing: React.FC<CostSharingProps> = ({
   );
   
   const totalForSelf = accommodationAmounts.amountForSelf + mealsAmounts.amountForSelf + programsAmounts.amountForSelf;
-  const percentageForSelf = Math.round((totalForSelf / totalCost) * 100);
+  const percentageForSelf = Math.round((totalForSelf / totalCost) * 100) || 100; // Default to 100% if totalCost is 0
   
   const selectPredefinedSponsor = (company: SponsorCompany) => {
     if (distributions.some(dist => dist.sponsorCompany?.id === company.id)) {
@@ -144,7 +144,7 @@ const CostSharing: React.FC<CostSharingProps> = ({
               accommodationAmount={accommodationAmounts.amountForSponsors[index] || 0}
               mealsAmount={mealsAmounts.amountForSponsors[index] || 0}
               programsAmount={programsAmounts.amountForSponsors[index] || 0}
-              totalAmount={totalPerSponsor[index]}
+              totalAmount={totalPerSponsor[index] || 0}
               onRemove={removeSponsor}
               onUpdateCoverage={updateSponsorCoverage}
             />
