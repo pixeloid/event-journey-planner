@@ -2,6 +2,7 @@
 import React from 'react';
 import AnimatedTransition from '@/components/UI/AnimatedTransition';
 import { Step } from '@/lib/types';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 type StepContainerProps = {
   currentStep: Step;
@@ -91,16 +92,18 @@ const StepContainer: React.FC<StepContainerProps> = ({
   };
 
   return (
-    <div className="bg-card rounded-lg shadow-md p-6 md:p-8 mb-8">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold mb-1">{currentStep.label}</h2>
-        <p className="text-muted-foreground">{currentStep.description}</p>
-      </div>
-
-      <AnimatedTransition key={currentStep.id} isVisible={true}>
-        {renderStepComponent()}
-      </AnimatedTransition>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>{currentStep.label}</CardTitle>
+        <CardDescription>{currentStep.description}</CardDescription>
+      </CardHeader>
+      
+      <CardContent>
+        <AnimatedTransition key={currentStep.id} isVisible={true}>
+          {renderStepComponent()}
+        </AnimatedTransition>
+      </CardContent>
+    </Card>
   );
 };
 

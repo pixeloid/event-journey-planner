@@ -6,6 +6,7 @@ import StepIndicator from '@/components/UI/StepIndicator';
 import StepContainer from '@/components/registration/StepContainer';
 import FormNavigation from '@/components/registration/FormNavigation';
 import RegistrationSuccess from '@/components/registration/RegistrationSuccess';
+import RegistrationSummary from '@/components/registration/RegistrationSummary';
 import { RegistrationProvider, useRegistration } from '@/contexts/RegistrationContext';
 
 // Storage key for current step
@@ -135,23 +136,33 @@ const RegistrationForm = () => {
           />
         </div>
 
-        <StepContainer 
-          currentStep={currentStep}
-          registrationData={getCurrentStepData()}
-          updateData={getCurrentUpdateFunction()}
-          checkIn={registrationData.accommodation?.checkIn || null}
-          checkOut={registrationData.accommodation?.checkOut || null}
-          allData={registrationData}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2">
+            <StepContainer 
+              currentStep={currentStep}
+              registrationData={getCurrentStepData()}
+              updateData={getCurrentUpdateFunction()}
+              checkIn={registrationData.accommodation?.checkIn || null}
+              checkOut={registrationData.accommodation?.checkOut || null}
+              allData={registrationData}
+            />
 
-        <FormNavigation
-          isFirstStep={isFirstStep}
-          isLastStep={isLastStep}
-          goToPreviousStep={goToPreviousStep}
-          goToNextStep={goToNextStep}
-          handleSubmit={handleSubmit}
-          isNextDisabled={currentStep.id === 'meals' && !hasValidAccommodationDates}
-        />
+            <div className="mt-6">
+              <FormNavigation
+                isFirstStep={isFirstStep}
+                isLastStep={isLastStep}
+                goToPreviousStep={goToPreviousStep}
+                goToNextStep={goToNextStep}
+                handleSubmit={handleSubmit}
+                isNextDisabled={currentStep.id === 'meals' && !hasValidAccommodationDates}
+              />
+            </div>
+          </div>
+          
+          <div className="hidden md:block">
+            <RegistrationSummary data={registrationData} />
+          </div>
+        </div>
       </div>
     </div>
   );

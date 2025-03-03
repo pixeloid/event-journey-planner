@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { SelectedAccommodation } from '@/lib/types';
-import { BuildingIcon, BedIcon, BedDoubleIcon } from 'lucide-react';
+import { BuildingIcon, BedIcon, BedDoubleIcon, UsersIcon } from 'lucide-react';
 import { differenceInDays } from 'date-fns';
 import { ACCOMMODATIONS } from '../accommodation/accommodationData';
 import DateRangePicker from '../accommodation/DateRangePicker';
@@ -10,6 +10,14 @@ import AccommodationCard from '../accommodation/AccommodationCard';
 import RoomTypeSelector from '../accommodation/RoomTypeSelector';
 import GuestSelector from '../accommodation/GuestSelector';
 import BookingSummary from '../accommodation/BookingSummary';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 type AccommodationProps = {
   data: SelectedAccommodation | null;
@@ -117,93 +125,110 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-8"
+      className="space-y-6"
     >
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-semibold tracking-tight mb-2">Szállásfoglalás</h2>
-        <p className="text-muted-foreground">Válassza ki a szállását és a szoba típusát</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          <h3 className="text-lg font-medium">Dátumok kiválasztása</h3>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-xl">Válasszon időpontot</CardTitle>
+          <CardDescription>
+            Adja meg az érkezés és távozás dátumát
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <DateRangePicker 
             dateRange={dateRange}
             onDateChange={handleDateChange}
           />
-        </div>
+        </CardContent>
+      </Card>
 
-        {showGuestSelector && (
-          <GuestSelector 
-            numberOfGuests={data.numberOfGuests || 1}
-            maxGuests={maxGuests}
-            onGuestsChange={handleGuestsChange}
-          />
-        )}
-      </div>
-
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium flex items-center">
-          <BuildingIcon className="h-5 w-5 mr-2" />
-          Válasszon szállást
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {ACCOMMODATIONS.map((accommodation) => (
-            <AccommodationCard 
-              key={accommodation.id}
-              accommodation={accommodation}
-              isSelected={selectedAccommodationId === accommodation.id}
-              onClick={() => handleAccommodationChange(accommodation.id)}
-            />
-          ))}
-        </div>
-      </div>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-xl flex items-center">
+            <BuildingIcon className="h-5 w-5 mr-2" />
+            Válasszon szállást
+          </CardTitle>
+          <CardDescription>
+            Kattintson egy szállásra a kiválasztáshoz
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {ACCOMMODATIONS.map((accommodation) => (
+              <AccommodationCard 
+                key={accommodation.id}
+                accommodation={accommodation}
+                isSelected={selectedAccommodationId === accommodation.id}
+                onClick={() => handleAccommodationChange(accommodation.id)}
+              />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {data?.accommodation && (
-        <div className="space-y-4 bg-accent/50 p-4 rounded-lg">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium flex items-center">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-xl flex items-center">
               <BedIcon className="h-5 w-5 mr-2" />
-              Szobatípusok ({data.accommodation.name})
-            </h3>
+              Szobatípus - {data.accommodation.name}
+            </CardTitle>
+            <CardDescription>
+              Válasszon az elérhető szobatípusok közül
+            </CardDescription>
             
-            <div className="flex space-x-2">
-              <button 
-                type="button"
-                onClick={() => setBedTypeFilter('all')}
-                className={`px-3 py-1 rounded text-sm ${bedTypeFilter === 'all' ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}
-              >
-                Összes
-              </button>
-              <button 
-                type="button"
-                onClick={() => setBedTypeFilter('single')}
-                className={`px-3 py-1 rounded text-sm flex items-center ${bedTypeFilter === 'single' ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}
-              >
-                <BedIcon className="h-3 w-3 mr-1" />
-                Egyágyas
-              </button>
-              <button 
-                type="button"
-                onClick={() => setBedTypeFilter('double')}
-                className={`px-3 py-1 rounded text-sm flex items-center ${bedTypeFilter === 'double' ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}
-              >
-                <BedDoubleIcon className="h-3 w-3 mr-1" />
-                Kétágyas
-              </button>
-            </div>
-          </div>
-          
-          {accommodationWithFilteredRooms && (
-            <RoomTypeSelector 
-              accommodation={accommodationWithFilteredRooms}
-              selectedRoomType={data.roomType}
-              onRoomTypeChange={handleRoomTypeChange}
-              numberOfGuests={data.numberOfGuests || 1}
+            <Tabs defaultValue="all" className="mt-3">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="all" onClick={() => setBedTypeFilter('all')}>
+                  Összes
+                </TabsTrigger>
+                <TabsTrigger value="single" onClick={() => setBedTypeFilter('single')}>
+                  <BedIcon className="h-3 w-3 mr-1" />
+                  Egyágyas
+                </TabsTrigger>
+                <TabsTrigger value="double" onClick={() => setBedTypeFilter('double')}>
+                  <BedDoubleIcon className="h-3 w-3 mr-1" />
+                  Kétágyas
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </CardHeader>
+          <CardContent>
+            {accommodationWithFilteredRooms && filteredRoomTypes.length > 0 ? (
+              <RoomTypeSelector 
+                accommodation={accommodationWithFilteredRooms}
+                selectedRoomType={data.roomType}
+                onRoomTypeChange={handleRoomTypeChange}
+                numberOfGuests={data.numberOfGuests || 1}
+              />
+            ) : (
+              <p className="text-muted-foreground text-center py-4">
+                Nincs elérhető szoba a kiválasztott szűrőkkel
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {showGuestSelector && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-xl flex items-center">
+              <UsersIcon className="h-5 w-5 mr-2" />
+              Vendégek
+            </CardTitle>
+            <CardDescription>
+              Adja meg hány vendég érkezik a szobába
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <GuestSelector 
+              numberOfGuests={data?.numberOfGuests || 1}
+              maxGuests={maxGuests}
+              onGuestsChange={handleGuestsChange}
             />
-          )}
-        </div>
+          </CardContent>
+        </Card>
       )}
 
       {data?.accommodation && data.roomType && data.numberOfNights > 0 && data.checkIn && data.checkOut && (

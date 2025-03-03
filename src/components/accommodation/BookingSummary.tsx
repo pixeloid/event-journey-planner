@@ -2,7 +2,9 @@
 import React from 'react';
 import { RoomType } from '@/lib/types';
 import { format } from 'date-fns';
-import { UsersIcon } from 'lucide-react';
+import { UsersIcon, CalendarIcon, BuildingIcon, BedIcon } from 'lucide-react';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 interface BookingSummaryProps {
   roomType: RoomType;
@@ -40,39 +42,57 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
   const isUnderOccupied = numberOfGuests < roomType.capacity && roomType.capacity > 1;
 
   return (
-    <div className="mt-8 p-4 bg-primary/10 border border-primary/20 rounded-lg">
-      <div className="flex items-center justify-between">
-        <div>
-          <h4 className="font-medium">Foglalás összegzése</h4>
-          <p className="text-sm">
-            {numberOfNights} éjszaka × {roomType.pricePerNight.toLocaleString()} Ft
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {checkInFormatted} - {checkOutFormatted}
-          </p>
-          <div className="flex items-center text-sm mt-1">
-            <UsersIcon className="h-4 w-4 mr-1" />
-            <span>{numberOfGuests} fő</span>
-            {isUnderOccupied && (
-              <span className="text-amber-600 ml-2 text-xs">
-                (Megjegyzés: {roomType.capacity} fős szoba {numberOfGuests} főre foglalva)
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-lg font-semibold">
-            {totalPrice.toLocaleString()} Ft
-          </div>
-          <div className="text-xs text-muted-foreground">Teljes összeg</div>
-          {numberOfGuests > 1 && (
-            <div className="text-xs text-muted-foreground">
-              {pricePerPerson.toLocaleString()} Ft / fő
+    <Card className="bg-primary/5 border-primary/20">
+      <CardContent className="p-6">
+        <CardTitle className="text-lg mb-4">Foglalás összegzése</CardTitle>
+        
+        <div className="space-y-4">
+          <div className="flex items-start justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center text-sm">
+                <BedIcon className="h-4 w-4 mr-1 text-primary" />
+                <span className="font-medium">{roomType.name}</span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground pl-5">
+                <span>{numberOfNights} éjszaka × {roomType.pricePerNight.toLocaleString()} Ft</span>
+              </div>
             </div>
+            <div className="text-right">
+              <div className="font-semibold">{totalPrice.toLocaleString()} Ft</div>
+              <div className="text-xs text-muted-foreground">teljes ár</div>
+            </div>
+          </div>
+          
+          <div className="flex flex-col space-y-2 text-sm">
+            <div className="flex items-center">
+              <CalendarIcon className="h-4 w-4 mr-1 text-primary" />
+              <span>{checkInFormatted} - {checkOutFormatted}</span>
+            </div>
+            <div className="flex items-center">
+              <UsersIcon className="h-4 w-4 mr-1 text-primary" />
+              <span>{numberOfGuests} fő</span>
+              {isUnderOccupied && (
+                <span className="text-amber-600 ml-2 text-xs">
+                  (Megjegyzés: {roomType.capacity} fős szoba {numberOfGuests} főre foglalva)
+                </span>
+              )}
+            </div>
+          </div>
+
+          {numberOfGuests > 1 && (
+            <>
+              <Separator />
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Ár személyenként:</span>
+                <div>
+                  <div className="font-medium">{pricePerPerson.toLocaleString()} Ft / fő</div>
+                </div>
+              </div>
+            </>
           )}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
