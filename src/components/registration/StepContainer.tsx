@@ -31,16 +31,11 @@ const StepContainer: React.FC<StepContainerProps> = ({
   const validCheckIn = checkIn && isValidDate(checkIn) ? checkIn : null;
   const validCheckOut = checkOut && isValidDate(checkOut) ? checkOut : null;
 
-  // Pass props based on the current step
-  if (currentStep.id === 'meals') {
-    return (
-      <div className="bg-card rounded-lg shadow-md p-6 md:p-8 mb-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold mb-1">{currentStep.label}</h2>
-          <p className="text-muted-foreground">{currentStep.description}</p>
-        </div>
-
-        <AnimatedTransition key={currentStep.id} isVisible={true}>
+  // Render the appropriate component based on the current step
+  const renderStepComponent = () => {
+    switch (currentStep.id) {
+      case 'meals':
+        return (
           <CurrentStepComponent
             data={registrationData}
             updateData={updateData}
@@ -48,44 +43,52 @@ const StepContainer: React.FC<StepContainerProps> = ({
             checkOut={validCheckOut}
             allData={allData}
           />
-        </AnimatedTransition>
-      </div>
-    );
-  } else if (currentStep.id === 'programs') {
-    return (
-      <div className="bg-card rounded-lg shadow-md p-6 md:p-8 mb-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold mb-1">{currentStep.label}</h2>
-          <p className="text-muted-foreground">{currentStep.description}</p>
-        </div>
-
-        <AnimatedTransition key={currentStep.id} isVisible={true}>
+        );
+      case 'programs':
+        return (
           <CurrentStepComponent
             selectedPrograms={registrationData}
             updatePrograms={updateData}
             allData={allData}
           />
-        </AnimatedTransition>
-      </div>
-    );
-  } else {
-    return (
-      <div className="bg-card rounded-lg shadow-md p-6 md:p-8 mb-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold mb-1">{currentStep.label}</h2>
-          <p className="text-muted-foreground">{currentStep.description}</p>
-        </div>
-
-        <AnimatedTransition key={currentStep.id} isVisible={true}>
+        );
+      case 'cost':
+        return (
+          <CurrentStepComponent
+            sponsors={registrationData || []}
+            updateSponsors={updateData}
+            allData={allData}
+          />
+        );
+      case 'summary':
+        return (
+          <CurrentStepComponent
+            data={allData}
+          />
+        );
+      default:
+        return (
           <CurrentStepComponent
             data={registrationData}
             updateData={updateData}
             allData={allData}
           />
-        </AnimatedTransition>
+        );
+    }
+  };
+
+  return (
+    <div className="bg-card rounded-lg shadow-md p-6 md:p-8 mb-8">
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold mb-1">{currentStep.label}</h2>
+        <p className="text-muted-foreground">{currentStep.description}</p>
       </div>
-    );
-  }
+
+      <AnimatedTransition key={currentStep.id} isVisible={true}>
+        {renderStepComponent()}
+      </AnimatedTransition>
+    </div>
+  );
 };
 
 export default StepContainer;

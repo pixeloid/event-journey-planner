@@ -9,6 +9,7 @@ type FormNavigationProps = {
   goToPreviousStep: () => void;
   goToNextStep: () => void;
   handleSubmit: () => void;
+  isNextDisabled?: boolean;
 };
 
 const FormNavigation: React.FC<FormNavigationProps> = ({
@@ -16,7 +17,8 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
   isLastStep,
   goToPreviousStep,
   goToNextStep,
-  handleSubmit
+  handleSubmit,
+  isNextDisabled = false
 }) => {
   return (
     <div className="flex justify-between items-center">
@@ -36,7 +38,11 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
           <CheckIcon className="w-4 h-4" />
         </Button>
       ) : (
-        <Button onClick={goToNextStep} className="flex items-center space-x-2">
+        <Button 
+          onClick={goToNextStep} 
+          className="flex items-center space-x-2"
+          disabled={isNextDisabled}
+        >
           <span>Tovább</span>
           <ArrowRightIcon className="w-4 h-4" />
         </Button>
