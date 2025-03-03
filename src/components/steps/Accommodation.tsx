@@ -28,24 +28,56 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
   
   // State to filter room types by bed type
   const [bedTypeFilter, setBedTypeFilter] = useState<'all' | 'single' | 'double'>('all');
+  const [filteredRoomTypes, setFilteredRoomTypes] = useState(data?.accommodation?.roomTypes || []);
+
+  useEffect(() => {
+    if (data?.accommodation) {
+      filterRoomTypes(data.accommodation.roomTypes);
+    }
+  }, [data?.accommodation, bedTypeFilter]);
+
+  const filterRoomTypes = (roomTypes) => {
+    if (!roomTypes) return [];
+    
+    if (bedTypeFilter === 'all') {
+      setFilteredRoomTypes(roomTypes);
+    } else {
+      const filtered = roomTypes.filter(room => {
+        if (bedTypeFilter === 'single') return room.bedType === 'single';
+        if (bedTypeFilter === 'double') return room.bedType === 'double';
+        return true;
+      });
+      setFilteredRoomTypes(filtered);
+    }
+  };
 
   const handleAccommodationChange = (accommodationId: string) => {
     setSelectedAccommodationId(accommodationId);
     const selectedAccommodation = ACCOMMODATIONS.find(acc => acc.id === accommodationId) || null;
     updateData({ 
       accommodation: selectedAccommodation,
-      roomType: null
+      roomType: null,
+      numberOfGuests: 1
     });
+    
+    if (selectedAccommodation) {
+      filterRoomTypes(selectedAccommodation.roomTypes);
+    }
   };
 
   const handleRoomTypeChange = (roomTypeId: string) => {
     if (!data?.accommodation) return;
     
     const selectedRoomType = data.accommodation.roomTypes.find(room => room.id === roomTypeId) || null;
+    
+    // Reset guest count to 1 or maintain current if it's valid for the new room type
+    const newGuestCount = !data.numberOfGuests || data.numberOfGuests > selectedRoomType?.capacity 
+      ? 1 
+      : data.numberOfGuests;
+    
     updateData({ 
       roomType: selectedRoomType,
-      // Reset guest count to 1 when selecting a new room
-      numberOfGuests: 1
+      numberOfGuests: newGuestCount
     });
   };
 
@@ -66,23 +98,19 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
     }
   };
 
-  // Filter room types based on selected bed type
-  const getFilteredRoomTypes = () => {
-    if (!data?.accommodation) return [];
-    if (bedTypeFilter === 'all') return data.accommodation.roomTypes;
-    
-    return data.accommodation.roomTypes.filter(room => {
-      if (bedTypeFilter === 'single') return room.bedType === 'single';
-      if (bedTypeFilter === 'double') return room.bedType === 'double';
-      return true;
-    });
-  };
-
   // Calculate max guests based on selected room type
   const maxGuests = data?.roomType?.capacity || 1;
 
   // Show guest selector immediately after selecting a room
   const showGuestSelector = data?.roomType !== null;
+
+  // Create modified accommodation data with filtered room types for display
+  const accommodationWithFilteredRooms = data?.accommodation 
+    ? { 
+        ...data.accommodation, 
+        roomTypes: filteredRoomTypes 
+      } 
+    : null;
 
   return (
     <motion.div 
@@ -167,14 +195,14 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
             </div>
           </div>
           
-          <RoomTypeSelector 
-            accommodation={{
-              ...data.accommodation,
-              roomTypes: getFilteredRoomTypes()
-            }}
-            selectedRoomType={data.roomType}
-            onRoomTypeChange={handleRoomTypeChange}
-          />
+          {accommodationWithFilteredRooms && (
+            <RoomTypeSelector 
+              accommodation={accommodationWithFilteredRooms}
+              selectedRoomType={data.roomType}
+              onRoomTypeChange={handleRoomTypeChange}
+              numberOfGuests={data.numberOfGuests || 1}
+            />
+          )}
         </div>
       )}
 
@@ -182,6 +210,7 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
         <BookingSummary 
           roomType={data.roomType}
           numberOfNights={data.numberOfNights}
+          numberOfGuests={data.numberOfGuests || 1}
           checkIn={data.checkIn}
           checkOut={data.checkOut}
         />
