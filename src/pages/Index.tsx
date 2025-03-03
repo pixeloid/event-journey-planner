@@ -147,7 +147,7 @@ const Index = () => {
 
         <div className="mb-12">
           <StepIndicator
-            steps={steps}
+            steps={steps.map(step => step.id)}
             currentStep={currentStepIndex}
             onStepClick={(index) => setCurrentStepIndex(index)}
           />
@@ -159,7 +159,7 @@ const Index = () => {
             <p className="text-muted-foreground">{currentStep.description}</p>
           </div>
 
-          <AnimatedTransition key={currentStep.id}>
+          <AnimatedTransition key={currentStep.id} isVisible={true}>
             <CurrentStepComponent
               data={
                 currentStep.id === 'personal'

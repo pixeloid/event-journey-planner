@@ -18,6 +18,7 @@ const ACCOMMODATIONS: AccommodationOption[] = [
   {
     id: 'acc1',
     name: 'Grand Hotel',
+    address: 'Budapest, Andrássy út 100',
     description: 'Luxus szálloda a belvárosban',
     image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=2340',
     roomTypes: [
@@ -50,6 +51,7 @@ const ACCOMMODATIONS: AccommodationOption[] = [
   {
     id: 'acc2',
     name: 'Park Inn',
+    address: 'Budapest, Váci út 50',
     description: 'Modern szálloda zöld környezetben',
     image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&q=80&w=2340',
     roomTypes: [
@@ -82,6 +84,7 @@ const ACCOMMODATIONS: AccommodationOption[] = [
   {
     id: 'acc3',
     name: 'City Boutique',
+    address: 'Budapest, Király utca 25',
     description: 'Elegáns boutique hotel a városközpontban',
     image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=2340',
     roomTypes: [
@@ -114,18 +117,18 @@ const ACCOMMODATIONS: AccommodationOption[] = [
 ];
 
 type AccommodationProps = {
-  data: SelectedAccommodation;
+  data: SelectedAccommodation | null;
   updateFields: (fields: Partial<SelectedAccommodation>) => void;
 };
 
 const Accommodation: React.FC<AccommodationProps> = ({ data, updateFields }) => {
-  const [selectedAccommodationId, setSelectedAccommodationId] = useState<string>(data.accommodation?.id || '');
+  const [selectedAccommodationId, setSelectedAccommodationId] = useState<string>(data?.accommodation?.id || '');
   const [dateRange, setDateRange] = useState<{
-    from: Date;
-    to: Date | undefined;
+    from: Date | null;
+    to: Date | null;
   }>({
-    from: data.checkIn,
-    to: data.checkOut
+    from: data?.checkIn || null,
+    to: data?.checkOut || null
   });
 
   const handleAccommodationChange = (accommodationId: string) => {
@@ -138,7 +141,7 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateFields }) => 
   };
 
   const handleRoomTypeChange = (roomTypeId: string) => {
-    if (!data.accommodation) return;
+    if (!data?.accommodation) return;
     
     const selectedRoomType = data.accommodation.roomTypes.find(room => room.id === roomTypeId) || null;
     updateFields({ roomType: selectedRoomType });
@@ -148,7 +151,7 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateFields }) => 
     updateFields({ numberOfGuests: parseInt(value) });
   };
 
-  const handleDateChange = (range: { from: Date; to: Date | undefined }) => {
+  const handleDateChange = (range: { from: Date | null; to: Date | null }) => {
     setDateRange(range);
     
     if (range.from && range.to) {
@@ -162,7 +165,7 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateFields }) => 
   };
 
   // Calculate max guests based on selected room type
-  const maxGuests = data.roomType?.capacity || 1;
+  const maxGuests = data?.roomType?.capacity || 1;
   
   // Generate options for number of guests select
   const guestOptions = Array.from({ length: maxGuests }, (_, i) => i + 1);
@@ -207,9 +210,9 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateFields }) => 
                 <Calendar
                   initialFocus
                   mode="range"
-                  defaultMonth={dateRange.from}
-                  selected={dateRange}
-                  onSelect={handleDateChange}
+                  defaultMonth={dateRange.from || undefined}
+                  selected={dateRange as any}
+                  onSelect={handleDateChange as any}
                   numberOfMonths={2}
                 />
               </PopoverContent>
@@ -223,13 +226,13 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateFields }) => 
           </div>
         </div>
 
-        {data.roomType && (
+        {data?.roomType && (
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Vendégek száma</h3>
             <div className="flex items-center space-x-2">
               <UsersIcon className="h-5 w-5 text-muted-foreground" />
               <Select
-                value={data.numberOfGuests.toString()}
+                value={data.numberOfGuests?.toString() || "1"}
                 onValueChange={handleGuestsChange}
               >
                 <SelectTrigger className="w-full">
@@ -288,7 +291,7 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateFields }) => 
         </RadioGroup>
       </div>
 
-      {data.accommodation && (
+      {data?.accommodation && (
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Válasszon szobatípust</h3>
           <RadioGroup
@@ -329,7 +332,7 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateFields }) => 
         </div>
       )}
 
-      {data.accommodation && data.roomType && data.numberOfNights > 0 && (
+      {data?.accommodation && data.roomType && data.numberOfNights > 0 && (
         <div className="mt-8 p-4 bg-accent rounded-lg">
           <div className="flex items-center justify-between">
             <div className="text-sm">

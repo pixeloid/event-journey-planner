@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CostDistribution, SponsorCompany } from '@/lib/types';
@@ -12,9 +11,42 @@ import { cn } from '@/lib/utils';
 
 // Mock sponsor companies
 const SPONSOR_COMPANIES: SponsorCompany[] = [
-  { id: 'comp1', name: 'ABC Kft.', contactPerson: 'Kiss János', email: 'janos.kiss@abc.hu' },
-  { id: 'comp2', name: 'XYZ Zrt.', contactPerson: 'Nagy Béla', email: 'bela.nagy@xyz.hu' },
-  { id: 'comp3', name: 'Innovatív Rt.', contactPerson: 'Szabó Anna', email: 'anna.szabo@innovativ.hu' }
+  { 
+    id: 'comp1', 
+    name: 'ABC Kft.', 
+    contactPerson: 'Kiss János', 
+    email: 'janos.kiss@abc.hu',
+    contributions: {
+      accommodation: 0,
+      meals: 0,
+      programs: 0,
+      total: 0
+    }
+  },
+  { 
+    id: 'comp2', 
+    name: 'XYZ Zrt.', 
+    contactPerson: 'Nagy Béla', 
+    email: 'bela.nagy@xyz.hu',
+    contributions: {
+      accommodation: 0,
+      meals: 0,
+      programs: 0,
+      total: 0
+    }
+  },
+  { 
+    id: 'comp3', 
+    name: 'Innovatív Rt.', 
+    contactPerson: 'Szabó Anna', 
+    email: 'anna.szabo@innovativ.hu',
+    contributions: {
+      accommodation: 0,
+      meals: 0,
+      programs: 0,
+      total: 0
+    }
+  }
 ];
 
 type CostSharingProps = {
@@ -41,7 +73,13 @@ const CostSharing: React.FC<CostSharingProps> = ({
     
     const newCompany: SponsorCompany = {
       id: `new-${Date.now()}`,
-      name: newCompanyName
+      name: newCompanyName,
+      contributions: {
+        accommodation: 0,
+        meals: 0,
+        programs: 0,
+        total: 0
+      }
     };
     
     const newDistribution: CostDistribution = {
@@ -70,7 +108,6 @@ const CostSharing: React.FC<CostSharingProps> = ({
     updateDistributions(newDistributions);
   };
   
-  // Calculate amounts
   const calculateAmount = (category: 'accommodationCoverage' | 'mealsCoverage' | 'programsCoverage') => {
     const totalPercentage = distributions.reduce((sum, dist) => sum + dist[category], 0);
     const percentageForSelf = Math.max(0, 100 - totalPercentage);
@@ -98,7 +135,6 @@ const CostSharing: React.FC<CostSharingProps> = ({
   const mealsAmounts = calculateAmount('mealsCoverage');
   const programsAmounts = calculateAmount('programsCoverage');
   
-  // Calculate totals per sponsor
   const calculateTotalPerSponsor = () => {
     return distributions.map((dist, index) => {
       const accommodationAmount = accommodationAmounts.amountForSponsors[index] || 0;
@@ -113,9 +149,7 @@ const CostSharing: React.FC<CostSharingProps> = ({
   const totalForSelf = accommodationAmounts.amountForSelf + mealsAmounts.amountForSelf + programsAmounts.amountForSelf;
   const percentageForSelf = Math.round((totalForSelf / totalCost) * 100);
   
-  // Select a predefined sponsor
   const selectPredefinedSponsor = (company: SponsorCompany) => {
-    // Check if sponsor already exists
     if (distributions.some(dist => dist.sponsorCompany?.id === company.id)) {
       return;
     }

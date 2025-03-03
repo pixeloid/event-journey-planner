@@ -1,14 +1,14 @@
 
 import React from 'react';
-import { PersonalInfoData } from '@/lib/types';
+import { PersonalData } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { motion } from 'framer-motion';
 
 type PersonalInfoProps = {
-  data: PersonalInfoData;
-  updateFields: (fields: Partial<PersonalInfoData>) => void;
+  data: PersonalData;
+  updateFields: (fields: Partial<PersonalData>) => void;
 };
 
 const PersonalInfo: React.FC<PersonalInfoProps> = ({ data, updateFields }) => {

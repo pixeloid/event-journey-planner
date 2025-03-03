@@ -7,25 +7,35 @@ export type PersonalData = {
   phone: string;
   company?: string;
   position?: string;
+  dietaryRestrictions?: string;
+  specialRequirements?: string;
 };
 
-export type RoomType = 'single' | 'double' | 'suite' | 'apartment';
+export type RoomType = {
+  id: string;
+  name: string;
+  capacity: number;
+  pricePerNight: number;
+  description: string;
+  available: number;
+};
 
 export type AccommodationOption = {
   id: string;
   name: string;
   address: string;
   description: string;
-  price: Record<RoomType, number>;
   image: string;
+  roomTypes: RoomType[];
 };
 
 export type SelectedAccommodation = {
-  accommodation: AccommodationOption;
-  roomType: RoomType;
-  guests: number;
-  checkIn: Date;
-  checkOut: Date;
+  accommodation: AccommodationOption | null;
+  roomType: RoomType | null;
+  numberOfGuests: number;
+  checkIn: Date | null;
+  checkOut: Date | null;
+  numberOfNights: number;
 };
 
 export type MealOption = {
@@ -46,12 +56,11 @@ export type ProgramOption = {
   name: string;
   description: string;
   date: Date;
-  time: string;
-  duration: number;
+  duration: string;
   price: number;
-  maxParticipants?: number;
-  currentParticipants?: number;
-  image?: string;
+  capacity: number;
+  available: number;
+  image: string;
 };
 
 export type SelectedProgram = ProgramOption;
@@ -59,12 +68,21 @@ export type SelectedProgram = ProgramOption;
 export type SponsorCompany = {
   id: string;
   name: string;
+  contactPerson?: string;
+  email?: string;
   contributions: {
     accommodation: number; // Percentage
     meals: number; // Percentage
     programs: number; // Percentage
     total: number; // Percentage of total
   };
+};
+
+export type CostDistribution = {
+  sponsorCompany: SponsorCompany;
+  accommodationCoverage: number;
+  mealsCoverage: number;
+  programsCoverage: number;
 };
 
 export type RegistrationData = {
