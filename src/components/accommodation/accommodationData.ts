@@ -16,7 +16,8 @@ export const ACCOMMODATIONS: AccommodationOption[] = [
         capacity: 1,
         pricePerNight: 35000,
         description: 'Kényelmes szoba egy személyre',
-        available: 10
+        available: 10,
+        bedType: 'single'
       },
       {
         id: 'room2',
@@ -24,7 +25,8 @@ export const ACCOMMODATIONS: AccommodationOption[] = [
         capacity: 2,
         pricePerNight: 45000,
         description: 'Tágas szoba két főre',
-        available: 8
+        available: 8,
+        bedType: 'double'
       },
       {
         id: 'room3',
@@ -32,7 +34,8 @@ export const ACCOMMODATIONS: AccommodationOption[] = [
         capacity: 4,
         pricePerNight: 85000,
         description: 'Luxus lakosztály kilátással',
-        available: 3
+        available: 3,
+        bedType: 'multiple'
       }
     ]
   },
@@ -49,7 +52,8 @@ export const ACCOMMODATIONS: AccommodationOption[] = [
         capacity: 2,
         pricePerNight: 32000,
         description: 'Kényelmes szoba egy vagy két főre',
-        available: 15
+        available: 15,
+        bedType: 'double'
       },
       {
         id: 'room5',
@@ -57,7 +61,8 @@ export const ACCOMMODATIONS: AccommodationOption[] = [
         capacity: 2,
         pricePerNight: 39000,
         description: 'Superior szoba panorámával',
-        available: 12
+        available: 12,
+        bedType: 'double'
       },
       {
         id: 'room6',
@@ -65,7 +70,8 @@ export const ACCOMMODATIONS: AccommodationOption[] = [
         capacity: 4,
         pricePerNight: 65000,
         description: 'Tágas szoba családok számára',
-        available: 5
+        available: 5,
+        bedType: 'multiple'
       }
     ]
   },
@@ -82,7 +88,8 @@ export const ACCOMMODATIONS: AccommodationOption[] = [
         capacity: 2,
         pricePerNight: 42000,
         description: 'Modern design szoba pároknak',
-        available: 8
+        available: 8,
+        bedType: 'double'
       },
       {
         id: 'room8',
@@ -90,7 +97,8 @@ export const ACCOMMODATIONS: AccommodationOption[] = [
         capacity: 2,
         pricePerNight: 52000,
         description: 'Tágas deluxe szoba francia ággyal',
-        available: 6
+        available: 6,
+        bedType: 'double'
       },
       {
         id: 'room9',
@@ -98,7 +106,8 @@ export const ACCOMMODATIONS: AccommodationOption[] = [
         capacity: 4,
         pricePerNight: 95000,
         description: 'Exkluzív tetőtéri lakosztály',
-        available: 2
+        available: 2,
+        bedType: 'multiple'
       }
     ]
   }

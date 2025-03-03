@@ -1,4 +1,3 @@
-
 // Registration Form Types
 export type PersonalData = {
   firstName: string;
@@ -18,6 +17,7 @@ export type RoomType = {
   pricePerNight: number;
   description: string;
   available: number;
+  bedType: 'single' | 'double' | 'multiple'; // Added bed type
 };
 
 export type AccommodationOption = {

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { RoomType, AccommodationOption } from '@/lib/types';
-import { CheckIcon, UsersIcon, InfoIcon } from 'lucide-react';
+import { CheckIcon, UsersIcon, InfoIcon, BedIcon, BedDoubleIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface RoomTypeSelectorProps {
@@ -15,6 +15,14 @@ const RoomTypeSelector: React.FC<RoomTypeSelectorProps> = ({
   selectedRoomType,
   onRoomTypeChange
 }) => {
+  // Function to get the appropriate bed icon based on bed type
+  const getBedIcon = (bedType: string) => {
+    if (bedType === 'double') {
+      return <BedDoubleIcon className="h-4 w-4 mr-1 text-muted-foreground" />;
+    }
+    return <BedIcon className="h-4 w-4 mr-1 text-muted-foreground" />;
+  };
+
   return (
     <div className="grid grid-cols-1 gap-3">
       {accommodation.roomTypes.map((room) => (
@@ -39,6 +47,10 @@ const RoomTypeSelector: React.FC<RoomTypeSelectorProps> = ({
                 <div className="flex items-center">
                   <UsersIcon className="h-4 w-4 mr-1 text-muted-foreground" />
                   <span>Max. {room.capacity} fő</span>
+                </div>
+                <div className="flex items-center">
+                  {getBedIcon(room.bedType)}
+                  <span>{room.bedType === 'single' ? 'Egyágyas' : room.bedType === 'double' ? 'Kétágyas' : 'Több ágyas'}</span>
                 </div>
                 <div className="flex items-center">
                   <InfoIcon className="h-4 w-4 mr-1 text-muted-foreground" />
