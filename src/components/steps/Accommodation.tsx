@@ -13,10 +13,10 @@ import BookingSummary from '../accommodation/BookingSummary';
 
 type AccommodationProps = {
   data: SelectedAccommodation | null;
-  updateFields: (fields: Partial<SelectedAccommodation>) => void;
+  updateData: (fields: Partial<SelectedAccommodation>) => void;
 };
 
-const Accommodation: React.FC<AccommodationProps> = ({ data, updateFields }) => {
+const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
   const [selectedAccommodationId, setSelectedAccommodationId] = useState<string>(data?.accommodation?.id || '');
   const [dateRange, setDateRange] = useState<{
     from: Date | null;
@@ -29,7 +29,7 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateFields }) => 
   const handleAccommodationChange = (accommodationId: string) => {
     setSelectedAccommodationId(accommodationId);
     const selectedAccommodation = ACCOMMODATIONS.find(acc => acc.id === accommodationId) || null;
-    updateFields({ 
+    updateData({ 
       accommodation: selectedAccommodation,
       roomType: null
     });
@@ -39,11 +39,11 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateFields }) => 
     if (!data?.accommodation) return;
     
     const selectedRoomType = data.accommodation.roomTypes.find(room => room.id === roomTypeId) || null;
-    updateFields({ roomType: selectedRoomType });
+    updateData({ roomType: selectedRoomType });
   };
 
   const handleGuestsChange = (value: string) => {
-    updateFields({ numberOfGuests: parseInt(value) });
+    updateData({ numberOfGuests: parseInt(value) });
   };
 
   const handleDateChange = (range: { from: Date | null; to: Date | null }) => {
@@ -51,7 +51,7 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateFields }) => 
     
     if (range.from && range.to) {
       const nights = differenceInDays(range.to, range.from);
-      updateFields({ 
+      updateData({ 
         checkIn: range.from,
         checkOut: range.to,
         numberOfNights: nights

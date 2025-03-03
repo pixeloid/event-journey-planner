@@ -84,7 +84,7 @@ type ProgramsProps = {
   updatePrograms: (programs: ProgramOption[]) => void;
 };
 
-const Programs: React.FC<ProgramsProps> = ({ selectedPrograms, updatePrograms }) => {
+const Programs: React.FC<ProgramsProps> = ({ selectedPrograms = [], updatePrograms }) => {
   const handleProgramToggle = (program: ProgramOption) => {
     const isSelected = selectedPrograms.some(p => p.id === program.id);
     
@@ -98,11 +98,11 @@ const Programs: React.FC<ProgramsProps> = ({ selectedPrograms, updatePrograms })
   };
   
   const isProgramSelected = (programId: string): boolean => {
-    return selectedPrograms.some(program => program.id === programId);
+    return selectedPrograms && selectedPrograms.some(program => program.id === programId);
   };
 
   const calculateTotalPrice = () => {
-    return selectedPrograms.reduce((sum, program) => sum + program.price, 0);
+    return selectedPrograms ? selectedPrograms.reduce((sum, program) => sum + program.price, 0) : 0;
   };
 
   return (
@@ -189,7 +189,7 @@ const Programs: React.FC<ProgramsProps> = ({ selectedPrograms, updatePrograms })
       </div>
 
       <div className="mt-8">
-        {selectedPrograms.length > 0 ? (
+        {selectedPrograms && selectedPrograms.length > 0 ? (
           <div className="p-4 bg-accent rounded-lg">
             <h4 className="font-medium mb-4">Kiválasztott programok</h4>
             <div className="space-y-2">

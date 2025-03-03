@@ -22,23 +22,16 @@ const StepContainer: React.FC<StepContainerProps> = ({
 }) => {
   const CurrentStepComponent = currentStep.component;
 
-  // Only render meals component if both dates are valid Date objects
-  const mealsWithDates = 
-    currentStep.id === 'meals' && 
-    checkIn instanceof Date && 
-    checkOut instanceof Date && 
-    !isNaN(checkIn.getTime()) && 
-    !isNaN(checkOut.getTime());
+  // Pass props based on the current step
+  if (currentStep.id === 'meals' && checkIn instanceof Date && checkOut instanceof Date) {
+    return (
+      <div className="bg-card rounded-lg shadow-md p-6 md:p-8 mb-8">
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold mb-1">{currentStep.label}</h2>
+          <p className="text-muted-foreground">{currentStep.description}</p>
+        </div>
 
-  return (
-    <div className="bg-card rounded-lg shadow-md p-6 md:p-8 mb-8">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold mb-1">{currentStep.label}</h2>
-        <p className="text-muted-foreground">{currentStep.description}</p>
-      </div>
-
-      <AnimatedTransition key={currentStep.id} isVisible={true}>
-        {mealsWithDates ? (
+        <AnimatedTransition key={currentStep.id} isVisible={true}>
           <CurrentStepComponent
             data={registrationData}
             updateData={updateData}
@@ -46,16 +39,43 @@ const StepContainer: React.FC<StepContainerProps> = ({
             checkOut={checkOut}
             allData={allData}
           />
-        ) : (
+        </AnimatedTransition>
+      </div>
+    );
+  } else if (currentStep.id === 'programs') {
+    return (
+      <div className="bg-card rounded-lg shadow-md p-6 md:p-8 mb-8">
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold mb-1">{currentStep.label}</h2>
+          <p className="text-muted-foreground">{currentStep.description}</p>
+        </div>
+
+        <AnimatedTransition key={currentStep.id} isVisible={true}>
+          <CurrentStepComponent
+            selectedPrograms={registrationData}
+            updatePrograms={updateData}
+          />
+        </AnimatedTransition>
+      </div>
+    );
+  } else {
+    return (
+      <div className="bg-card rounded-lg shadow-md p-6 md:p-8 mb-8">
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold mb-1">{currentStep.label}</h2>
+          <p className="text-muted-foreground">{currentStep.description}</p>
+        </div>
+
+        <AnimatedTransition key={currentStep.id} isVisible={true}>
           <CurrentStepComponent
             data={registrationData}
             updateData={updateData}
             allData={allData}
           />
-        )}
-      </AnimatedTransition>
-    </div>
-  );
+        </AnimatedTransition>
+      </div>
+    );
+  }
 };
 
 export default StepContainer;

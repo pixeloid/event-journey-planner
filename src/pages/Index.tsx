@@ -100,7 +100,7 @@ const RegistrationForm = () => {
       case 'cost':
         return registrationData.sponsors;
       default:
-        return registrationData;
+        return null;
     }
   };
 
