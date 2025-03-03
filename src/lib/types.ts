@@ -1,3 +1,4 @@
+
 // Registration Form Types
 export type PersonalData = {
   firstName: string;

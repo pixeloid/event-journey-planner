@@ -7,8 +7,8 @@ type StepContainerProps = {
   currentStep: Step;
   registrationData: any;
   updateData: (data: any) => void;
-  checkIn?: Date;
-  checkOut?: Date;
+  checkIn?: Date | null;
+  checkOut?: Date | null;
   allData: any;
 };
 

@@ -8,10 +8,10 @@ import { motion } from 'framer-motion';
 
 type PersonalInfoProps = {
   data: PersonalData;
-  updateFields: (fields: Partial<PersonalData>) => void;
+  updateData: (fields: Partial<PersonalData>) => void;
 };
 
-const PersonalInfo: React.FC<PersonalInfoProps> = ({ data, updateFields }) => {
+const PersonalInfo: React.FC<PersonalInfoProps> = ({ data, updateData }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
@@ -30,7 +30,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ data, updateFields }) => {
           <Input
             id="lastName"
             value={data.lastName}
-            onChange={e => updateFields({ lastName: e.target.value })}
+            onChange={e => updateData({ lastName: e.target.value })}
             required
           />
         </div>
@@ -40,7 +40,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ data, updateFields }) => {
           <Input
             id="firstName"
             value={data.firstName}
-            onChange={e => updateFields({ firstName: e.target.value })}
+            onChange={e => updateData({ firstName: e.target.value })}
             required
           />
         </div>
@@ -53,7 +53,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ data, updateFields }) => {
             id="email"
             type="email"
             value={data.email}
-            onChange={e => updateFields({ email: e.target.value })}
+            onChange={e => updateData({ email: e.target.value })}
             required
           />
         </div>
@@ -64,7 +64,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ data, updateFields }) => {
             id="phone"
             type="tel"
             value={data.phone}
-            onChange={e => updateFields({ phone: e.target.value })}
+            onChange={e => updateData({ phone: e.target.value })}
             required
           />
         </div>
@@ -76,7 +76,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ data, updateFields }) => {
           <Input
             id="company"
             value={data.company || ''}
-            onChange={e => updateFields({ company: e.target.value })}
+            onChange={e => updateData({ company: e.target.value })}
           />
         </div>
         
@@ -85,7 +85,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ data, updateFields }) => {
           <Input
             id="position"
             value={data.position || ''}
-            onChange={e => updateFields({ position: e.target.value })}
+            onChange={e => updateData({ position: e.target.value })}
           />
         </div>
       </div>
@@ -95,7 +95,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ data, updateFields }) => {
         <Textarea
           id="dietaryRestrictions"
           value={data.dietaryRestrictions || ''}
-          onChange={e => updateFields({ dietaryRestrictions: e.target.value })}
+          onChange={e => updateData({ dietaryRestrictions: e.target.value })}
           placeholder="Pl. vegetáriánus, gluténmentes, stb."
           className="resize-none"
         />
@@ -106,7 +106,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ data, updateFields }) => {
         <Textarea
           id="specialRequirements"
           value={data.specialRequirements || ''}
-          onChange={e => updateFields({ specialRequirements: e.target.value })}
+          onChange={e => updateData({ specialRequirements: e.target.value })}
           placeholder="Bármilyen speciális igény vagy megjegyzés"
           className="resize-none"
         />
