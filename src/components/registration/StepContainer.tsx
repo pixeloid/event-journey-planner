@@ -22,8 +22,8 @@ const StepContainer: React.FC<StepContainerProps> = ({
 }) => {
   const CurrentStepComponent = currentStep.component;
 
-  // Only render certain components if we have the required props
-  const shouldRenderWithDates = 
+  // Only render meals component if both dates are valid Date objects
+  const mealsWithDates = 
     currentStep.id === 'meals' && 
     checkIn instanceof Date && 
     checkOut instanceof Date && 
@@ -38,7 +38,7 @@ const StepContainer: React.FC<StepContainerProps> = ({
       </div>
 
       <AnimatedTransition key={currentStep.id} isVisible={true}>
-        {shouldRenderWithDates ? (
+        {mealsWithDates ? (
           <CurrentStepComponent
             data={registrationData}
             updateData={updateData}

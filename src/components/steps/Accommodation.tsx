@@ -9,7 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, CheckIcon, BedIcon, UsersIcon } from 'lucide-react';
+import { CalendarIcon, CheckIcon, BedIcon, UsersIcon, InfoIcon, BuildingIcon } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -252,95 +252,113 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateFields }) => 
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Válasszon szállást</h3>
-        <RadioGroup
-          value={selectedAccommodationId}
-          onValueChange={handleAccommodationChange}
-          className="grid grid-cols-1 gap-4"
-        >
+        <h3 className="text-lg font-medium flex items-center">
+          <BuildingIcon className="h-5 w-5 mr-2" />
+          Válasszon szállást
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {ACCOMMODATIONS.map((accommodation) => (
-            <Label
+            <Card 
               key={accommodation.id}
-              htmlFor={accommodation.id}
               className={cn(
-                "cursor-pointer rounded-lg border p-0 hover:bg-accent hover:text-accent-foreground transition-colors overflow-hidden",
+                "cursor-pointer hover:bg-accent transition-colors overflow-hidden",
                 selectedAccommodationId === accommodation.id && "ring-2 ring-primary"
               )}
+              onClick={() => handleAccommodationChange(accommodation.id)}
             >
-              <Card className="bg-transparent border-0 shadow-none">
-                <div className="overflow-hidden h-48 w-full">
-                  <img
-                    src={accommodation.image}
-                    alt={accommodation.name}
-                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-                  />
+              <div className="overflow-hidden h-32 w-full">
+                <img
+                  src={accommodation.image}
+                  alt={accommodation.name}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <CardHeader className="py-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">{accommodation.name}</CardTitle>
+                  {selectedAccommodationId === accommodation.id && (
+                    <CheckIcon className="h-5 w-5 text-primary" />
+                  )}
                 </div>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-xl">{accommodation.name}</CardTitle>
-                    <RadioGroupItem id={accommodation.id} value={accommodation.id} className="sr-only" />
-                    {selectedAccommodationId === accommodation.id && (
-                      <CheckIcon className="h-5 w-5 text-primary" />
-                    )}
-                  </div>
-                  <CardDescription>{accommodation.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            </Label>
+                <CardDescription className="line-clamp-2 text-xs">
+                  {accommodation.description} • {accommodation.address}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 pb-3">
+                <div className="text-sm font-medium">
+                  Szobák ára: {accommodation.roomTypes[0].pricePerNight.toLocaleString()} Ft-tól / éj
+                </div>
+              </CardContent>
+            </Card>
           ))}
-        </RadioGroup>
+        </div>
       </div>
 
       {data?.accommodation && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Válasszon szobatípust</h3>
-          <RadioGroup
-            value={data.roomType?.id || ''}
-            onValueChange={handleRoomTypeChange}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4"
-          >
+        <div className="space-y-4 bg-accent/50 p-4 rounded-lg">
+          <h3 className="text-lg font-medium flex items-center">
+            <BedIcon className="h-5 w-5 mr-2" />
+            Szobatípusok ({data.accommodation.name})
+          </h3>
+          <div className="grid grid-cols-1 gap-3">
             {data.accommodation.roomTypes.map((room) => (
-              <Label
+              <div
                 key={room.id}
-                htmlFor={room.id}
                 className={cn(
-                  "cursor-pointer border rounded-lg p-4 hover:bg-accent transition-colors",
-                  data.roomType?.id === room.id && "ring-2 ring-primary bg-accent"
+                  "cursor-pointer border rounded-lg p-4 bg-background hover:bg-accent/50 transition-colors",
+                  data.roomType?.id === room.id && "ring-2 ring-primary"
                 )}
+                onClick={() => handleRoomTypeChange(room.id)}
               >
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <BedIcon className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">{room.name}</span>
+                      {data.roomType?.id === room.id && (
+                        <CheckIcon className="h-4 w-4 text-primary" />
+                      )}
                     </div>
-                    <p className="text-xs text-muted-foreground">{room.description}</p>
-                    <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                      <UsersIcon className="h-3 w-3" />
-                      <span>Max. {room.capacity} fő</span>
+                    <p className="text-sm text-muted-foreground">{room.description}</p>
+                    <div className="flex items-center space-x-4 mt-1 text-sm">
+                      <div className="flex items-center">
+                        <UsersIcon className="h-4 w-4 mr-1 text-muted-foreground" />
+                        <span>Max. {room.capacity} fő</span>
+                      </div>
+                      <div className="flex items-center">
+                        <InfoIcon className="h-4 w-4 mr-1 text-muted-foreground" />
+                        <span>Még {room.available} szabad</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end">
-                    <div className="font-semibold">{room.pricePerNight.toLocaleString()} Ft</div>
+                  <div className="text-right">
+                    <div className="font-bold text-lg">{room.pricePerNight.toLocaleString()} Ft</div>
                     <div className="text-xs text-muted-foreground">éjszakánként</div>
-                    <RadioGroupItem id={room.id} value={room.id} className="sr-only" />
                   </div>
                 </div>
-              </Label>
+              </div>
             ))}
-          </RadioGroup>
+          </div>
         </div>
       )}
 
       {data?.accommodation && data.roomType && data.numberOfNights > 0 && (
-        <div className="mt-8 p-4 bg-accent rounded-lg">
+        <div className="mt-8 p-4 bg-primary/10 border border-primary/20 rounded-lg">
           <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <p>{data.numberOfNights} éjszaka × {data.roomType.pricePerNight.toLocaleString()} Ft</p>
-              <p className="text-muted-foreground">{data.checkIn && format(data.checkIn, "yyyy. MMMM d.")} - {data.checkOut && format(data.checkOut, "yyyy. MMMM d.")}</p>
+            <div>
+              <h4 className="font-medium">Foglalás összegzése</h4>
+              <p className="text-sm">
+                {data.numberOfNights} éjszaka × {data.roomType.pricePerNight.toLocaleString()} Ft
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {data.checkIn && format(data.checkIn, "yyyy. MMMM d.")} - {data.checkOut && format(data.checkOut, "yyyy. MMMM d.")}
+              </p>
             </div>
-            <div className="text-lg font-semibold">
-              {(data.numberOfNights * data.roomType.pricePerNight).toLocaleString()} Ft
+            <div className="text-right">
+              <div className="text-lg font-semibold">
+                {(data.numberOfNights * data.roomType.pricePerNight).toLocaleString()} Ft
+              </div>
+              <div className="text-xs text-muted-foreground">Teljes összeg</div>
             </div>
           </div>
         </div>

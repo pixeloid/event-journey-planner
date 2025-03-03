@@ -43,14 +43,16 @@ const MEAL_OPTIONS: MealOption[] = [
 
 type MealsProps = {
   data: SelectedMeal[];
-  checkIn: Date;
-  checkOut: Date;
+  checkIn?: Date | null;
+  checkOut?: Date | null;
   updateData: (meals: SelectedMeal[]) => void;
+  allData?: any;
 };
 
-const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateData }) => {
-  // Ensure checkIn and checkOut are valid Date objects
-  if (!(checkIn instanceof Date) || !(checkOut instanceof Date) || isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
+const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateData, allData }) => {
+  // Extra validation to ensure we have valid dates
+  if (!checkIn || !checkOut || !(checkIn instanceof Date) || !(checkOut instanceof Date) || 
+      isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
     return (
       <div className="text-center p-8">
         <p className="text-muted-foreground">Kérjük, először válasszon ki egy szállást és adja meg a foglalás dátumait.</p>
@@ -67,7 +69,7 @@ const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateData }) =>
   // Initialize or get existing selected meals for each day
   const selectedMeals = days.map(day => {
     const existingSelection = data.find(item => 
-      format(item.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+      item.date instanceof Date && format(item.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
     );
     
     return existingSelection || { date: day, meals: [] };
@@ -76,7 +78,7 @@ const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateData }) =>
   const handleMealToggle = (day: Date, meal: MealOption) => {
     const updatedMeals = [...selectedMeals];
     const dayIndex = updatedMeals.findIndex(item => 
-      format(item.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+      item.date instanceof Date && format(item.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
     );
     
     if (dayIndex >= 0) {
@@ -96,7 +98,7 @@ const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateData }) =>
 
   const isMealSelected = (day: Date, mealId: string): boolean => {
     const daySelection = selectedMeals.find(item => 
-      format(item.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+      item.date instanceof Date && format(item.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
     );
     
     return daySelection ? daySelection.meals.some(meal => meal.id === mealId) : false;
