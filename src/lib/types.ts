@@ -1,4 +1,3 @@
-
 // Registration Form Types
 export type PersonalData = {
   firstName: string;
@@ -65,6 +64,14 @@ export type ProgramOption = {
 
 export type SelectedProgram = ProgramOption;
 
+// Cost Distribution Types
+export type CostDistribution = {
+  sponsorCompany: SponsorCompany;
+  accommodationCoverage: number;
+  mealsCoverage: number;
+  programsCoverage: number;
+};
+
 export type SponsorCompany = {
   id: string;
   name: string;
@@ -76,13 +83,6 @@ export type SponsorCompany = {
     programs: number; // Percentage
     total: number; // Percentage of total
   };
-};
-
-export type CostDistribution = {
-  sponsorCompany: SponsorCompany;
-  accommodationCoverage: number;
-  mealsCoverage: number;
-  programsCoverage: number;
 };
 
 export type RegistrationData = {
