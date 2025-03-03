@@ -1,40 +1,31 @@
 
-// Event registration form types
-export type PersonalInfoData = {
+// Registration Form Types
+export type PersonalData = {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   company?: string;
   position?: string;
-  dietaryRestrictions?: string;
-  specialRequirements?: string;
 };
+
+export type RoomType = 'single' | 'double' | 'suite' | 'apartment';
 
 export type AccommodationOption = {
   id: string;
   name: string;
+  address: string;
   description: string;
+  price: Record<RoomType, number>;
   image: string;
-  roomTypes: RoomType[];
-};
-
-export type RoomType = {
-  id: string;
-  name: string;
-  capacity: number;
-  pricePerNight: number;
-  description: string;
-  available: number;
 };
 
 export type SelectedAccommodation = {
-  accommodation: AccommodationOption | null;
-  roomType: RoomType | null;
-  numberOfGuests: number;
+  accommodation: AccommodationOption;
+  roomType: RoomType;
+  guests: number;
   checkIn: Date;
   checkOut: Date;
-  numberOfNights: number;
 };
 
 export type MealOption = {
@@ -55,32 +46,38 @@ export type ProgramOption = {
   name: string;
   description: string;
   date: Date;
-  duration: string;
+  time: string;
+  duration: number;
   price: number;
-  image: string;
-  capacity: number;
-  available: number;
+  maxParticipants?: number;
+  currentParticipants?: number;
+  image?: string;
 };
+
+export type SelectedProgram = ProgramOption;
 
 export type SponsorCompany = {
   id: string;
   name: string;
-  contactPerson?: string;
-  email?: string;
+  contributions: {
+    accommodation: number; // Percentage
+    meals: number; // Percentage
+    programs: number; // Percentage
+    total: number; // Percentage of total
+  };
 };
 
-export type CostDistribution = {
-  accommodationCoverage: number; // Percentage covered by sponsor
-  mealsCoverage: number;
-  programsCoverage: number;
-  sponsorCompany: SponsorCompany | null;
-};
-
-export type FormData = {
-  personalInfo: PersonalInfoData;
-  accommodation: SelectedAccommodation;
+export type RegistrationData = {
+  personalInfo: PersonalData;
+  accommodation: SelectedAccommodation | null;
   meals: SelectedMeal[];
-  programs: ProgramOption[];
-  costDistribution: CostDistribution[];
-  totalCost: number;
+  programs: SelectedProgram[];
+  sponsors: SponsorCompany[];
+};
+
+export type Step = {
+  id: string;
+  label: string;
+  description: string;
+  component: React.ComponentType<any>;
 };
