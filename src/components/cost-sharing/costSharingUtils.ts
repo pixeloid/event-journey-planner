@@ -1,28 +1,32 @@
 
-import { CostDistribution } from '@/lib/types';
-
+/**
+ * Calculates the amount for sponsors and self based on distributions and total amount
+ */
 export const calculateAmount = (
-  distributions: CostDistribution[] | undefined,
-  category: 'accommodationCoverage' | 'mealsCoverage' | 'programsCoverage',
-  categoryTotal: number
+  distributions: any[] = [],
+  field: string,
+  totalAmount: number = 0
 ) => {
-  // Return default values if distributions is undefined or empty
-  if (!distributions || distributions.length === 0) {
+  if (!Array.isArray(distributions) || distributions.length === 0 || totalAmount <= 0) {
     return {
       amountForSponsors: [],
-      amountForSelf: categoryTotal,
+      amountForSelf: totalAmount,
       percentageForSelf: 100
     };
   }
-  
-  const totalPercentage = distributions.reduce((sum, dist) => sum + dist[category], 0);
-  const percentageForSelf = Math.max(0, 100 - totalPercentage);
-  
+
+  // Calculate amount for each sponsor
   const amountForSponsors = distributions.map(dist => {
-    return (dist[category] / 100) * categoryTotal;
+    const coverage = typeof dist[field] === 'number' ? dist[field] : 0;
+    return (coverage / 100) * totalAmount;
   });
   
-  const amountForSelf = (percentageForSelf / 100) * categoryTotal;
+  // Calculate total amount covered by sponsors
+  const totalCoveredBySponsors = amountForSponsors.reduce((acc, amount) => acc + amount, 0);
+  
+  // Calculate amount and percentage for self
+  const amountForSelf = totalAmount - totalCoveredBySponsors;
+  const percentageForSelf = Math.round((amountForSelf / totalAmount) * 100);
   
   return {
     amountForSponsors,
@@ -31,17 +35,20 @@ export const calculateAmount = (
   };
 };
 
+/**
+ * Calculates the total amount per sponsor by summing accommodation, meals, and programs
+ */
 export const calculateTotalPerSponsor = (
-  distributions: CostDistribution[] | undefined,
-  accommodationAmounts: { amountForSponsors: number[] },
-  mealsAmounts: { amountForSponsors: number[] },
-  programsAmounts: { amountForSponsors: number[] }
+  distributions: any[] = [],
+  accommodationAmounts: { amountForSponsors: number[] } = { amountForSponsors: [] },
+  mealsAmounts: { amountForSponsors: number[] } = { amountForSponsors: [] },
+  programsAmounts: { amountForSponsors: number[] } = { amountForSponsors: [] }
 ) => {
-  if (!distributions || distributions.length === 0) {
+  if (!Array.isArray(distributions) || distributions.length === 0) {
     return [];
   }
-  
-  return distributions.map((dist, index) => {
+
+  return distributions.map((_, index) => {
     const accommodationAmount = accommodationAmounts.amountForSponsors[index] || 0;
     const mealsAmount = mealsAmounts.amountForSponsors[index] || 0;
     const programsAmount = programsAmounts.amountForSponsors[index] || 0;

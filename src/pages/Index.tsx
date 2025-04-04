@@ -8,6 +8,8 @@ import FormNavigation from '@/components/registration/FormNavigation';
 import RegistrationSuccess from '@/components/registration/RegistrationSuccess';
 import RegistrationSummary from '@/components/registration/RegistrationSummary';
 import { RegistrationProvider, useRegistration } from '@/contexts/RegistrationContext';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { InfoIcon } from 'lucide-react';
 
 // Storage key for current step
 const STEP_STORAGE_KEY = 'event_registration_step';
@@ -26,6 +28,8 @@ const RegistrationForm = () => {
   };
 
   const [currentStepIndex, setCurrentStepIndex] = useState(getInitialStep());
+  const [showSummaryOnMobile, setShowSummaryOnMobile] = useState(false);
+
   const { 
     registrationData, 
     updatePersonalInfo, 
@@ -61,15 +65,26 @@ const RegistrationForm = () => {
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === registrationSteps.length - 1;
 
+  // Check if there's any content in the registration data
+  const hasContent = 
+    Object.keys(registrationData.personalInfo || {}).length > 0 || 
+    registrationData.accommodation || 
+    (registrationData.meals && registrationData.meals.length > 0) || 
+    (registrationData.programs && registrationData.programs.length > 0);
+
   const goToNextStep = () => {
     if (!isLastStep) {
       setCurrentStepIndex(prev => prev + 1);
+      // Scroll to top when changing steps
+      window.scrollTo(0, 0);
     }
   };
 
   const goToPreviousStep = () => {
     if (!isFirstStep) {
       setCurrentStepIndex(prev => prev - 1);
+      // Scroll to top when changing steps
+      window.scrollTo(0, 0);
     }
   };
 
@@ -116,6 +131,10 @@ const RegistrationForm = () => {
     }
   };
 
+  const toggleMobileSummary = () => {
+    setShowSummaryOnMobile(prev => !prev);
+  };
+
   if (formSubmitted) {
     return <RegistrationSuccess />;
   }
@@ -134,6 +153,16 @@ const RegistrationForm = () => {
             currentStep={currentStepIndex}
             onStepClick={setCurrentStepIndex}
           />
+        </div>
+
+        {/* Mobile toggle for summary */}
+        <div className="md:hidden mb-6">
+          <button
+            onClick={toggleMobileSummary}
+            className="w-full py-2 px-4 bg-accent rounded-md text-center font-medium"
+          >
+            {showSummaryOnMobile ? "Elrejtés" : "Regisztráció összegzése"}
+          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -159,9 +188,35 @@ const RegistrationForm = () => {
             </div>
           </div>
           
-          <div className="hidden md:block">
-            <RegistrationSummary data={registrationData} />
+          {/* Desktop summary (always visible) */}
+          <div className="hidden md:block md:sticky md:top-6 md:self-start">
+            {hasContent ? (
+              <RegistrationSummary data={registrationData} />
+            ) : (
+              <Alert className="bg-accent">
+                <InfoIcon className="h-4 w-4" />
+                <AlertDescription>
+                  Az összesítés az adatok megadása után fog megjelenni ezen a panelen.
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
+
+          {/* Mobile summary (toggleable) */}
+          {showSummaryOnMobile && (
+            <div className="md:hidden">
+              {hasContent ? (
+                <RegistrationSummary data={registrationData} />
+              ) : (
+                <Alert className="bg-accent">
+                  <InfoIcon className="h-4 w-4" />
+                  <AlertDescription>
+                    Az összesítés az adatok megadása után fog megjelenni ezen a panelen.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
