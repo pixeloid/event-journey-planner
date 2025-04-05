@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { RegistrationData } from '@/lib/types';
@@ -31,18 +32,30 @@ const Summary = ({ data }: { data: RegistrationData }) => {
   
   const totalCost = accommodationCost + mealsCost + programsCost;
   
-  // Calculate sponsor contributions
-  const sponsorContributions = sponsors.map(sponsor => ({
-    name: sponsor.name,
-    accommodation: (sponsor.contributions.accommodation / 100) * accommodationCost,
-    meals: (sponsor.contributions.meals / 100) * mealsCost,
-    programs: (sponsor.contributions.programs / 100) * programsCost,
-    total: (
-      (sponsor.contributions.accommodation / 100) * accommodationCost +
-      (sponsor.contributions.meals / 100) * mealsCost +
-      (sponsor.contributions.programs / 100) * programsCost
-    )
-  }));
+  // Calculate sponsor contributions - with validation to avoid undefined errors
+  const sponsorContributions = sponsors.map(sponsor => {
+    // Make sure contributions object and its properties exist
+    const contributions = sponsor.contributions || { accommodation: 0, meals: 0, programs: 0 };
+    
+    // Safely access contribution percentages with fallbacks to 0
+    const accommodationPercent = typeof contributions.accommodation === 'number' ? contributions.accommodation : 0;
+    const mealsPercent = typeof contributions.meals === 'number' ? contributions.meals : 0;
+    const programsPercent = typeof contributions.programs === 'number' ? contributions.programs : 0;
+    
+    // Calculate contribution amounts
+    const accommodationAmount = (accommodationPercent / 100) * accommodationCost;
+    const mealsAmount = (mealsPercent / 100) * mealsCost;
+    const programsAmount = (programsPercent / 100) * programsCost;
+    const totalAmount = accommodationAmount + mealsAmount + programsAmount;
+    
+    return {
+      name: sponsor.name,
+      accommodation: accommodationAmount,
+      meals: mealsAmount,
+      programs: programsAmount,
+      total: totalAmount
+    };
+  });
   
   const totalSponsorContribution = sponsorContributions.reduce(
     (total, sponsor) => total + sponsor.total, 0

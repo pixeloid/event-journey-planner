@@ -15,9 +15,13 @@ export const calculateAmount = (
     };
   }
 
-  // Calculate amount for each sponsor
+  // Calculate amount for each sponsor with proper null/undefined checks
   const amountForSponsors = distributions.map(dist => {
-    const coverage = typeof dist[field] === 'number' ? dist[field] : 0;
+    // Make sure the distribution object and the specified field exist
+    if (!dist || typeof dist[field] !== 'number') {
+      return 0;
+    }
+    const coverage = dist[field];
     return (coverage / 100) * totalAmount;
   });
   
@@ -49,9 +53,14 @@ export const calculateTotalPerSponsor = (
   }
 
   return distributions.map((_, index) => {
-    const accommodationAmount = accommodationAmounts.amountForSponsors[index] || 0;
-    const mealsAmount = mealsAmounts.amountForSponsors[index] || 0;
-    const programsAmount = programsAmounts.amountForSponsors[index] || 0;
+    const accommodationAmount = Array.isArray(accommodationAmounts.amountForSponsors) ? 
+      (accommodationAmounts.amountForSponsors[index] || 0) : 0;
+    
+    const mealsAmount = Array.isArray(mealsAmounts.amountForSponsors) ? 
+      (mealsAmounts.amountForSponsors[index] || 0) : 0;
+    
+    const programsAmount = Array.isArray(programsAmounts.amountForSponsors) ? 
+      (programsAmounts.amountForSponsors[index] || 0) : 0;
     
     return accommodationAmount + mealsAmount + programsAmount;
   });
