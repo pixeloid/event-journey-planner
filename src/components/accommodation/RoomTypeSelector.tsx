@@ -25,10 +25,11 @@ const RoomTypeSelector: React.FC<RoomTypeSelectorProps> = ({
     return <BedIcon className="h-4 w-4 mr-1 text-muted-foreground" />;
   };
 
-  // Calculate price per person for display
+  // Calculate price per person for display with null handling
   const calculatePricePerPerson = (room: RoomType, guests: number) => {
-    if (guests <= 0) return room.pricePerNight;
-    return Math.round(room.pricePerNight / guests);
+    const price = typeof room.pricePerNight === 'number' ? room.pricePerNight : 0;
+    if (guests <= 0) return price;
+    return Math.round(price / guests);
   };
 
   return (
@@ -36,6 +37,7 @@ const RoomTypeSelector: React.FC<RoomTypeSelectorProps> = ({
       {accommodation.roomTypes.map((room) => {
         const pricePerPerson = calculatePricePerPerson(room, numberOfGuests);
         const isUnderOccupied = numberOfGuests < room.capacity && room.capacity > 1;
+        const price = typeof room.pricePerNight === 'number' ? room.pricePerNight : 0;
         
         return (
           <div
@@ -76,7 +78,7 @@ const RoomTypeSelector: React.FC<RoomTypeSelectorProps> = ({
                 )}
               </div>
               <div className="text-right">
-                <div className="font-bold text-lg">{room.pricePerNight.toLocaleString()} Ft</div>
+                <div className="font-bold text-lg">{price.toLocaleString()} Ft</div>
                 <div className="text-xs text-muted-foreground">éjszakánként</div>
                 {numberOfGuests > 1 && (
                   <div className="text-xs text-muted-foreground mt-1">

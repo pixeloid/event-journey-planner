@@ -13,18 +13,37 @@ interface RegistrationSummaryProps {
 const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({ data }) => {
   const { accommodation, meals, programs } = data;
 
-  // Calculate costs
-  const accommodationCost = accommodation?.roomType?.pricePerNight 
-    ? accommodation.roomType.pricePerNight * (accommodation.numberOfNights || 0)
-    : 0;
+  // Calculate costs with safe checks for null/undefined
+  const accommodationCost = (() => {
+    if (!accommodation?.roomType?.pricePerNight) return 0;
+    
+    const nights = accommodation.numberOfNights || 
+      (accommodation.checkIn && accommodation.checkOut ? 
+        Math.max(1, Math.floor((accommodation.checkOut.getTime() - accommodation.checkIn.getTime()) / (1000 * 60 * 60 * 24))) : 
+        0);
+    
+    return accommodation.roomType.pricePerNight * nights;
+  })();
   
-  const mealsCost = meals?.reduce((total, dayMeal) => 
-    total + (dayMeal.meals?.reduce((mealTotal, meal) => mealTotal + (meal.price || 0), 0) || 0), 0) || 0;
+  const mealsCost = Array.isArray(meals) ? 
+    meals.reduce((total, dayMeal) => 
+      total + (Array.isArray(dayMeal.meals) ? 
+        dayMeal.meals.reduce((mealTotal, meal) => 
+          mealTotal + (typeof meal.price === 'number' ? meal.price : 0), 0) : 0), 0) : 0;
   
-  const programsCost = programs?.reduce((total, program) => 
-    total + (program.price || 0), 0) || 0;
+  const programsCost = Array.isArray(programs) ? 
+    programs.reduce((total, program) => 
+      total + (typeof program.price === 'number' ? program.price : 0), 0) : 0;
   
   const totalCost = accommodationCost + mealsCost + programsCost;
+
+  // Format date safely
+  const formatDateSafely = (date: Date | null | undefined) => {
+    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+      return '';
+    }
+    return format(date, 'MMM d.');
+  };
 
   return (
     <Card className="sticky top-6 overflow-auto max-h-[calc(100vh-4rem)]">
@@ -49,20 +68,23 @@ const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({ data }) => {
                 <div className="flex items-center gap-1">
                   <CalendarIcon className="h-3 w-3 text-muted-foreground" />
                   <span className="text-muted-foreground">
-                    {format(accommodation.checkIn, "MMM d.")} - {format(accommodation.checkOut, "MMM d.")}
+                    {formatDateSafely(accommodation.checkIn)} - {formatDateSafely(accommodation.checkOut)}
                   </span>
                 </div>
               )}
-              {accommodationCost > 0 && (
+              {accommodation.numberOfNights > 0 && accommodation.roomType?.pricePerNight && (
                 <div className="text-primary-foreground/80 font-medium">
                   {accommodationCost.toLocaleString()} Ft
+                  <span className="text-xs text-muted-foreground ml-1">
+                    ({accommodation.roomType.pricePerNight.toLocaleString()} Ft × {accommodation.numberOfNights} éj)
+                  </span>
                 </div>
               )}
             </div>
           </div>
         )}
         
-        {meals && meals.length > 0 && (
+        {Array.isArray(meals) && meals.length > 0 && (
           <div className="mb-4">
             <div className="flex items-center gap-2 font-medium text-sm mb-2">
               <UtensilsIcon className="h-4 w-4 text-primary" />
@@ -81,7 +103,7 @@ const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({ data }) => {
           </div>
         )}
         
-        {programs && programs.length > 0 && (
+        {Array.isArray(programs) && programs.length > 0 && (
           <div className="mb-4">
             <div className="flex items-center gap-2 font-medium text-sm mb-2">
               <CalendarIcon className="h-4 w-4 text-primary" />

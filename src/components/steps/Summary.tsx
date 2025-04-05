@@ -18,22 +18,35 @@ import { Separator } from '@/components/ui/separator';
 const Summary = ({ data }: { data: RegistrationData }) => {
   const { personalInfo, accommodation, meals, programs, sponsors } = data;
 
-  // Calculate cost summaries
-  const accommodationCost = accommodation ? 
-    (accommodation.accommodation && accommodation.roomType ? 
-      accommodation.roomType.pricePerNight || 0 : 0) * 
-    (accommodation.checkOut && accommodation.checkIn ? 
-      (accommodation.checkOut.getTime() - accommodation.checkIn.getTime()) / (1000 * 60 * 60 * 24) : 0) : 0;
+  // Calculate cost summaries with careful handling of null/undefined values
+  const accommodationCost = (() => {
+    // Check if all required properties are available
+    if (!accommodation || !accommodation.roomType || 
+        typeof accommodation.roomType.pricePerNight !== 'number') {
+      return 0;
+    }
+
+    // Calculate nights with null checks on dates
+    const nights = accommodation.numberOfNights || 
+      (accommodation.checkIn && accommodation.checkOut ? 
+        Math.max(1, Math.floor((accommodation.checkOut.getTime() - accommodation.checkIn.getTime()) / (1000 * 60 * 60 * 24))) : 
+        0);
+    
+    return accommodation.roomType.pricePerNight * nights;
+  })();
   
-  const mealsCost = meals.reduce((total, dayMeal) => 
-    total + dayMeal.meals.reduce((sum, meal) => sum + meal.price, 0), 0);
+  const mealsCost = Array.isArray(meals) ? meals.reduce((total, dayMeal) => 
+    total + (Array.isArray(dayMeal.meals) ? dayMeal.meals.reduce((sum, meal) => 
+      sum + (typeof meal.price === 'number' ? meal.price : 0), 0) : 0
+    ), 0) : 0;
   
-  const programsCost = programs.reduce((total, program) => total + program.price, 0);
+  const programsCost = Array.isArray(programs) ? programs.reduce((total, program) => 
+    total + (typeof program.price === 'number' ? program.price : 0), 0) : 0;
   
   const totalCost = accommodationCost + mealsCost + programsCost;
   
   // Calculate sponsor contributions - with validation to avoid undefined errors
-  const sponsorContributions = sponsors.map(sponsor => {
+  const sponsorContributions = Array.isArray(sponsors) ? sponsors.map(sponsor => {
     // Make sure contributions object and its properties exist
     const contributions = sponsor.contributions || { accommodation: 0, meals: 0, programs: 0 };
     
@@ -55,13 +68,21 @@ const Summary = ({ data }: { data: RegistrationData }) => {
       programs: programsAmount,
       total: totalAmount
     };
-  });
+  }) : [];
   
   const totalSponsorContribution = sponsorContributions.reduce(
     (total, sponsor) => total + sponsor.total, 0
   );
 
   const remainingCost = totalCost - totalSponsorContribution;
+
+  // Helper function to format dates safely
+  const formatDateSafely = (date: Date | null | undefined) => {
+    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+      return '';
+    }
+    return format(date, 'yyyy. MM. dd.');
+  };
 
   return (
     <motion.div
@@ -78,23 +99,23 @@ const Summary = ({ data }: { data: RegistrationData }) => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Név:</span>
-                <span className="font-medium">{personalInfo.lastName} {personalInfo.firstName}</span>
+                <span className="font-medium">{personalInfo?.lastName || ''} {personalInfo?.firstName || ''}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Email:</span>
-                <span>{personalInfo.email}</span>
+                <span>{personalInfo?.email || ''}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Telefon:</span>
-                <span>{personalInfo.phone}</span>
+                <span>{personalInfo?.phone || ''}</span>
               </div>
-              {personalInfo.company && (
+              {personalInfo?.company && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Cég:</span>
                   <span>{personalInfo.company}</span>
                 </div>
               )}
-              {personalInfo.position && (
+              {personalInfo?.position && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Pozíció:</span>
                   <span>{personalInfo.position}</span>
@@ -112,23 +133,23 @@ const Summary = ({ data }: { data: RegistrationData }) => {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Szálláshely:</span>
-                  <span className="font-medium">{accommodation.accommodation?.name}</span>
+                  <span className="font-medium">{accommodation.accommodation?.name || 'Nincs kiválasztva'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Szobatípus:</span>
-                  <span>{accommodation.roomType ? accommodation.roomType.name : ''}</span>
+                  <span>{accommodation.roomType?.name || 'Nincs kiválasztva'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Vendégek száma:</span>
-                  <span>{accommodation.numberOfGuests}</span>
+                  <span>{accommodation.numberOfGuests || 1}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Érkezés:</span>
-                  <span>{accommodation.checkIn ? format(accommodation.checkIn, 'yyyy. MM. dd.') : ''}</span>
+                  <span>{formatDateSafely(accommodation.checkIn)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Távozás:</span>
-                  <span>{accommodation.checkOut ? format(accommodation.checkOut, 'yyyy. MM. dd.') : ''}</span>
+                  <span>{formatDateSafely(accommodation.checkOut)}</span>
                 </div>
                 <div className="flex justify-between font-medium pt-2 border-t border-border mt-2">
                   <span>Összesen:</span>
@@ -143,18 +164,22 @@ const Summary = ({ data }: { data: RegistrationData }) => {
       {/* Meals and Programs */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Meals */}
-        {meals.length > 0 && (
+        {Array.isArray(meals) && meals.length > 0 && (
           <Card>
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4">Étkezések</h3>
               <div className="space-y-2">
                 {meals.map((dayMeal, index) => (
                   <div key={index} className="mb-4">
-                    <h4 className="text-md font-semibold">{format(dayMeal.date, 'yyyy. MM. dd.')}</h4>
-                    {dayMeal.meals.map((meal) => (
+                    <h4 className="text-md font-semibold">
+                      {dayMeal.date instanceof Date && !isNaN(dayMeal.date.getTime()) 
+                        ? format(dayMeal.date, 'yyyy. MM. dd.') 
+                        : `Nap ${index + 1}`}
+                    </h4>
+                    {Array.isArray(dayMeal.meals) && dayMeal.meals.map((meal) => (
                       <div key={meal.id} className="flex justify-between">
                         <span>{meal.name}</span>
-                        <span>{meal.price.toLocaleString()} Ft</span>
+                        <span>{(meal.price || 0).toLocaleString()} Ft</span>
                       </div>
                     ))}
                   </div>
@@ -169,7 +194,7 @@ const Summary = ({ data }: { data: RegistrationData }) => {
         )}
         
         {/* Programs */}
-        {programs.length > 0 && (
+        {Array.isArray(programs) && programs.length > 0 && (
           <Card>
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4">Programok</h3>
@@ -177,7 +202,7 @@ const Summary = ({ data }: { data: RegistrationData }) => {
                 {programs.map((program) => (
                   <div key={program.id} className="flex justify-between">
                     <span>{program.name}</span>
-                    <span>{program.price.toLocaleString()} Ft</span>
+                    <span>{(program.price || 0).toLocaleString()} Ft</span>
                   </div>
                 ))}
                 <div className="flex justify-between font-medium pt-2 border-t border-border mt-2">
@@ -215,7 +240,7 @@ const Summary = ({ data }: { data: RegistrationData }) => {
             </div>
           </div>
           
-          {sponsors.length > 0 && (
+          {Array.isArray(sponsors) && sponsors.length > 0 && (
             <>
               <h4 className="text-md font-semibold mt-6 mb-3">Szponzori hozzájárulások</h4>
               <Table>
