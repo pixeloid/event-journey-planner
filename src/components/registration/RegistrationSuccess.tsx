@@ -2,8 +2,18 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckIcon } from 'lucide-react';
+import { useRegistration } from '@/contexts/RegistrationContext';
 
 const RegistrationSuccess: React.FC = () => {
+  const { resetForm } = useRegistration();
+
+  const handleNewRegistration = () => {
+    // Reset the form data completely
+    resetForm();
+    // Reload the page to ensure a clean state
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-4xl p-8 bg-card rounded-lg shadow-lg text-center">
@@ -14,7 +24,7 @@ const RegistrationSuccess: React.FC = () => {
         <p className="text-lg text-muted-foreground mb-8">
           Köszönjük a regisztrációját. A visszaigazolást emailben elküldjük Önnek.
         </p>
-        <Button onClick={() => window.location.reload()}>Új regisztráció</Button>
+        <Button onClick={handleNewRegistration}>Új regisztráció</Button>
       </div>
     </div>
   );

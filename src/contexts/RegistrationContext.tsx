@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { RegistrationData, PersonalData, SelectedAccommodation, SelectedMeal, SelectedProgram, SponsorCompany } from '@/lib/types';
 
@@ -23,6 +22,7 @@ const initialRegistrationData: RegistrationData = {
 
 // Storage key for localStorage
 const STORAGE_KEY = 'event_registration_data';
+const STEP_STORAGE_KEY = 'event_registration_step';
 
 type RegistrationContextType = {
   registrationData: RegistrationData;
@@ -123,9 +123,13 @@ export const RegistrationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
   
   const resetForm = () => {
+    // Reset registration data to initial state
     setRegistrationData(initialRegistrationData);
     setFormSubmitted(false);
+    
+    // Clear localStorage items
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STEP_STORAGE_KEY);
   };
 
   return (
