@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { SelectedAccommodation } from '@/lib/types';
-import { BuildingIcon, BedIcon, BedDoubleIcon, UsersIcon } from 'lucide-react';
+import { BuildingIcon, BedIcon, BedDoubleIcon, UsersIcon, AlertCircleIcon } from 'lucide-react';
 import { differenceInDays } from 'date-fns';
 import { ACCOMMODATIONS } from '../accommodation/accommodationData';
 import DateRangePicker from '../accommodation/DateRangePicker';
@@ -18,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type AccommodationProps = {
   data: SelectedAccommodation | null;
@@ -37,6 +37,9 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
   // State to filter room types by bed type
   const [bedTypeFilter, setBedTypeFilter] = useState<'all' | 'single' | 'double'>('all');
   const [filteredRoomTypes, setFilteredRoomTypes] = useState(data?.accommodation?.roomTypes || []);
+
+  // Check if dates are selected
+  const areDatesSelected = dateRange.from !== null && dateRange.to !== null;
 
   useEffect(() => {
     if (data?.accommodation) {
@@ -59,13 +62,48 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
     }
   };
 
+  const handleDateChange = (range: { from: Date | null; to: Date | null }) => {
+    setDateRange(range);
+    
+    if (range.from && range.to) {
+      const nights = differenceInDays(range.to, range.from);
+      updateData({ 
+        checkIn: range.from,
+        checkOut: range.to,
+        numberOfNights: nights
+      });
+      
+      // If dates change and accommodations were previously selected, maintain the selection
+      if (selectedAccommodationId && data?.accommodation) {
+        // Keep current accommodation but recalculate nights
+        updateData({
+          accommodation: data.accommodation,
+          roomType: data.roomType,
+          numberOfNights: nights
+        });
+      }
+    } else {
+      // Reset accommodation selection if dates are cleared
+      updateData({
+        checkIn: range.from,
+        checkOut: range.to,
+        numberOfNights: 0,
+      });
+    }
+  };
+
   const handleAccommodationChange = (accommodationId: string) => {
     setSelectedAccommodationId(accommodationId);
     const selectedAccommodation = ACCOMMODATIONS.find(acc => acc.id === accommodationId) || null;
+    
+    // Calculate nights again to ensure it's updated
+    const nights = dateRange.from && dateRange.to ? differenceInDays(dateRange.to, dateRange.from) : 0;
+    
     updateData({ 
       accommodation: selectedAccommodation,
       roomType: null,
-      numberOfGuests: 1
+      numberOfGuests: 1,
+      numberOfNights: nights
     });
     
     if (selectedAccommodation) {
@@ -91,19 +129,6 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
 
   const handleGuestsChange = (value: string) => {
     updateData({ numberOfGuests: parseInt(value) });
-  };
-
-  const handleDateChange = (range: { from: Date | null; to: Date | null }) => {
-    setDateRange(range);
-    
-    if (range.from && range.to) {
-      const nights = differenceInDays(range.to, range.from);
-      updateData({ 
-        checkIn: range.from,
-        checkOut: range.to,
-        numberOfNights: nights
-      });
-    }
   };
 
   // Calculate max guests based on selected room type
@@ -142,31 +167,42 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-xl flex items-center">
-            <BuildingIcon className="h-5 w-5 mr-2" />
-            Válasszon szállást
-          </CardTitle>
-          <CardDescription>
-            Kattintson egy szállásra a kiválasztáshoz
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {ACCOMMODATIONS.map((accommodation) => (
-              <AccommodationCard 
-                key={accommodation.id}
-                accommodation={accommodation}
-                isSelected={selectedAccommodationId === accommodation.id}
-                onClick={() => handleAccommodationChange(accommodation.id)}
-              />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {!areDatesSelected && (
+        <Alert>
+          <AlertCircleIcon className="h-4 w-4" />
+          <AlertDescription>
+            Kérjük, először válasszon érkezési és távozási dátumot a szállások megjelenítéséhez.
+          </AlertDescription>
+        </Alert>
+      )}
 
-      {data?.accommodation && (
+      {areDatesSelected && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-xl flex items-center">
+              <BuildingIcon className="h-5 w-5 mr-2" />
+              Válasszon szállást
+            </CardTitle>
+            <CardDescription>
+              Kattintson egy szállásra a kiválasztáshoz
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {ACCOMMODATIONS.map((accommodation) => (
+                <AccommodationCard 
+                  key={accommodation.id}
+                  accommodation={accommodation}
+                  isSelected={selectedAccommodationId === accommodation.id}
+                  onClick={() => handleAccommodationChange(accommodation.id)}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {areDatesSelected && data?.accommodation && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-xl flex items-center">

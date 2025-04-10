@@ -33,11 +33,12 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
   const checkInFormatted = formatDate(checkIn);
   const checkOutFormatted = formatDate(checkOut);
   
-  // Ensure we have a valid price
+  // Ensure we have a valid price and nights
   const pricePerNight = typeof roomType.pricePerNight === 'number' ? roomType.pricePerNight : 0;
+  const validNights = Math.max(1, numberOfNights); // Ensure at least 1 night
   
   // Calculate total price with validation
-  const totalPrice = Math.max(1, numberOfNights) * pricePerNight;
+  const totalPrice = validNights * pricePerNight;
   
   // Calculate price per person (if more than 1 guest)
   const pricePerPerson = numberOfGuests > 1 ? Math.round(totalPrice / numberOfGuests) : totalPrice;
@@ -58,7 +59,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                 <span className="font-medium">{roomType.name}</span>
               </div>
               <div className="flex items-center text-sm text-muted-foreground pl-5">
-                <span>{numberOfNights} éjszaka × {pricePerNight.toLocaleString()} Ft</span>
+                <span>{validNights} éjszaka × {pricePerNight.toLocaleString()} Ft</span>
               </div>
             </div>
             <div className="text-right">

@@ -46,6 +46,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ dateRange, onDateChan
             selected={dateRange as any}
             onSelect={onDateChange as any}
             numberOfMonths={2}
+            className="p-3 pointer-events-auto"
           />
         </PopoverContent>
       </Popover>

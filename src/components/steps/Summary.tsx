@@ -47,22 +47,23 @@ const Summary = ({ data }: { data: RegistrationData }) => {
   
   // Calculate sponsor contributions - with validation to avoid undefined errors
   const sponsorContributions = Array.isArray(sponsors) ? sponsors.map(sponsor => {
+    // Make sure sponsor and contributions object exist
+    if (!sponsor) return { name: 'Unknown', accommodation: 0, meals: 0, programs: 0, total: 0 };
+    
+    const sponsorName = sponsor.name || 'Unknown';
+    
     // Make sure contributions object and its properties exist
-    const contributions = sponsor.contributions || { accommodation: 0, meals: 0, programs: 0 };
+    const contributions = sponsor.contributions || { accommodation: 0, meals: 0, programs: 0, total: 0 };
     
-    // Safely access contribution percentages with fallbacks to 0
-    const accommodationPercent = typeof contributions.accommodation === 'number' ? contributions.accommodation : 0;
-    const mealsPercent = typeof contributions.meals === 'number' ? contributions.meals : 0;
-    const programsPercent = typeof contributions.programs === 'number' ? contributions.programs : 0;
-    
-    // Calculate contribution amounts
-    const accommodationAmount = (accommodationPercent / 100) * accommodationCost;
-    const mealsAmount = (mealsPercent / 100) * mealsCost;
-    const programsAmount = (programsPercent / 100) * programsCost;
-    const totalAmount = accommodationAmount + mealsAmount + programsAmount;
+    // Safely access contribution amounts with fallbacks to 0
+    const accommodationAmount = typeof contributions.accommodation === 'number' ? contributions.accommodation : 0;
+    const mealsAmount = typeof contributions.meals === 'number' ? contributions.meals : 0; 
+    const programsAmount = typeof contributions.programs === 'number' ? contributions.programs : 0;
+    const totalAmount = typeof contributions.total === 'number' ? 
+      contributions.total : (accommodationAmount + mealsAmount + programsAmount);
     
     return {
-      name: sponsor.name,
+      name: sponsorName,
       accommodation: accommodationAmount,
       meals: mealsAmount,
       programs: programsAmount,
@@ -74,7 +75,7 @@ const Summary = ({ data }: { data: RegistrationData }) => {
     (total, sponsor) => total + sponsor.total, 0
   );
 
-  const remainingCost = totalCost - totalSponsorContribution;
+  const remainingCost = Math.max(0, totalCost - totalSponsorContribution);
 
   // Helper function to format dates safely
   const formatDateSafely = (date: Date | null | undefined) => {

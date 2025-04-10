@@ -29,8 +29,8 @@ export const calculateAmount = (
   const totalCoveredBySponsors = amountForSponsors.reduce((acc, amount) => acc + amount, 0);
   
   // Calculate amount and percentage for self
-  const amountForSelf = totalAmount - totalCoveredBySponsors;
-  const percentageForSelf = Math.round((amountForSelf / totalAmount) * 100);
+  const amountForSelf = Math.max(0, totalAmount - totalCoveredBySponsors);
+  const percentageForSelf = totalAmount > 0 ? Math.round((amountForSelf / totalAmount) * 100) : 100;
   
   return {
     amountForSponsors,
@@ -63,5 +63,48 @@ export const calculateTotalPerSponsor = (
       (programsAmounts.amountForSponsors[index] || 0) : 0;
     
     return accommodationAmount + mealsAmount + programsAmount;
+  });
+};
+
+/**
+ * Updates the sponsor contributions based on the distribution percentages
+ */
+export const updateSponsorContributions = (distributions = [], 
+  accommodationTotal = 0, 
+  mealsTotal = 0, 
+  programsTotal = 0) => {
+  
+  if (!Array.isArray(distributions)) return [];
+  
+  return distributions.map(dist => {
+    if (!dist || !dist.sponsorCompany) return dist;
+    
+    // Safely get percentages with fallbacks to 0
+    const accommodationPercent = typeof dist.accommodationCoverage === 'number' ? dist.accommodationCoverage : 0;
+    const mealsPercent = typeof dist.mealsCoverage === 'number' ? dist.mealsCoverage : 0;
+    const programsPercent = typeof dist.programsCoverage === 'number' ? dist.programsCoverage : 0;
+    
+    // Calculate contribution amounts
+    const accommodationAmount = (accommodationPercent / 100) * accommodationTotal;
+    const mealsAmount = (mealsPercent / 100) * mealsTotal;
+    const programsAmount = (programsPercent / 100) * programsTotal;
+    const totalAmount = accommodationAmount + mealsAmount + programsAmount;
+    
+    // Create a new sponsorCompany object with updated contributions
+    const updatedCompany = {
+      ...dist.sponsorCompany,
+      contributions: {
+        accommodation: accommodationAmount,
+        meals: mealsAmount,
+        programs: programsAmount,
+        total: totalAmount
+      }
+    };
+    
+    // Return the updated distribution with the new sponsorCompany
+    return {
+      ...dist,
+      sponsorCompany: updatedCompany
+    };
   });
 };

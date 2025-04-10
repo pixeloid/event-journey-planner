@@ -3,7 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CostDistribution, SponsorCompany } from '@/lib/types';
 import { SPONSOR_COMPANIES } from '../cost-sharing/costSharingData';
-import { calculateAmount, calculateTotalPerSponsor } from '../cost-sharing/costSharingUtils';
+import { 
+  calculateAmount, 
+  calculateTotalPerSponsor, 
+  updateSponsorContributions 
+} from '../cost-sharing/costSharingUtils';
 import CostOverview from '../cost-sharing/CostOverview';
 import SponsorControls from '../cost-sharing/SponsorControls';
 import SponsorSelector from '../cost-sharing/SponsorSelector';
@@ -43,6 +47,23 @@ const CostSharing: React.FC<CostSharingProps> = ({
       });
     }
   }, []);
+
+  // Update sponsor contributions whenever distributions or totals change
+  useEffect(() => {
+    if (distributions.length > 0) {
+      const updatedDistributions = updateSponsorContributions(
+        distributions,
+        accommodationTotal,
+        mealsTotal,
+        programsTotal
+      );
+      
+      // Only update if there's a real change to avoid infinite loops
+      if (JSON.stringify(updatedDistributions) !== JSON.stringify(distributions)) {
+        updateDistributions(updatedDistributions);
+      }
+    }
+  }, [distributions, accommodationTotal, mealsTotal, programsTotal]);
   
   const addSponsor = (name: string) => {
     if (!name.trim()) return;
@@ -104,10 +125,15 @@ const CostSharing: React.FC<CostSharingProps> = ({
     value: number
   ) => {
     const newDistributions = [...distributions];
+    
+    // Ensure the distribution at this index exists
+    if (!newDistributions[index]) return;
+    
     newDistributions[index] = {
       ...newDistributions[index],
       [field]: value
     };
+    
     updateDistributions(newDistributions);
   };
   
@@ -139,11 +165,22 @@ const CostSharing: React.FC<CostSharingProps> = ({
       return;
     }
     
+    // Make sure company has properly initialized contributions
+    const sponsorWithContributions: SponsorCompany = {
+      ...company,
+      contributions: company.contributions || {
+        accommodation: 0,
+        meals: 0,
+        programs: 0,
+        total: 0
+      }
+    };
+    
     const newDistribution: CostDistribution = {
       accommodationCoverage: 0,
       mealsCoverage: 0,
       programsCoverage: 0,
-      sponsorCompany: company
+      sponsorCompany: sponsorWithContributions
     };
     
     updateDistributions([...distributions, newDistribution]);
