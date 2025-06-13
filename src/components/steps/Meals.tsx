@@ -69,8 +69,8 @@ const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateData, allD
     return existingSelection || { date: day, meals: [] };
   });
 
-  const handleMealToggle = (day: Date, meal: MealOption) => {
-    console.log(`Handling meal toggle for ${meal.name} on ${format(day, 'yyyy-MM-dd')}`);
+  const handleMealQuantityChange = (day: Date, meal: MealOption, quantity: number) => {
+    console.log(`Handling quantity change for ${meal.name} to ${quantity} on ${format(day, 'yyyy-MM-dd')}`);
     
     const updatedMeals = [...selectedMeals];
     const dayIndex = updatedMeals.findIndex(item => 
@@ -78,16 +78,23 @@ const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateData, allD
     );
     
     if (dayIndex >= 0) {
-      const existingMealIndex = updatedMeals[dayIndex].meals.findIndex(m => m.id === meal.id);
+      const existingMealIndex = updatedMeals[dayIndex].meals.findIndex(item => item.meal.id === meal.id);
       
-      if (existingMealIndex >= 0) {
-        // Remove meal if already selected
-        console.log(`Removing meal: ${meal.name}`);
-        updatedMeals[dayIndex].meals = updatedMeals[dayIndex].meals.filter(m => m.id !== meal.id);
+      if (quantity === 0) {
+        // Remove meal if quantity is 0
+        if (existingMealIndex >= 0) {
+          console.log(`Removing meal: ${meal.name}`);
+          updatedMeals[dayIndex].meals = updatedMeals[dayIndex].meals.filter(item => item.meal.id !== meal.id);
+        }
       } else {
-        // Add meal
-        console.log(`Adding meal: ${meal.name}`);
-        updatedMeals[dayIndex].meals.push(meal);
+        // Add or update meal quantity
+        if (existingMealIndex >= 0) {
+          console.log(`Updating meal quantity: ${meal.name} to ${quantity}`);
+          updatedMeals[dayIndex].meals[existingMealIndex].quantity = quantity;
+        } else {
+          console.log(`Adding meal: ${meal.name} with quantity ${quantity}`);
+          updatedMeals[dayIndex].meals.push({ meal, quantity });
+        }
       }
       
       console.log(`Updated meals for day:`, updatedMeals[dayIndex]);
@@ -115,7 +122,7 @@ const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateData, allD
             key={format(day, 'yyyy-MM-dd')}
             day={day}
             selectedMeals={selectedMeals}
-            onMealToggle={handleMealToggle}
+            onMealQuantityChange={handleMealQuantityChange}
           />
         ))}
       </Tabs>

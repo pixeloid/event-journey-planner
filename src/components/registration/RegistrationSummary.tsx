@@ -22,8 +22,9 @@ const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({ data }) => {
   const mealsCost = Array.isArray(meals) ? 
     meals.reduce((total, dayMeal) => 
       total + (Array.isArray(dayMeal.meals) ? 
-        dayMeal.meals.reduce((mealTotal, meal) => 
-          mealTotal + (typeof meal.price === 'number' ? meal.price : 0), 0) : 0), 0) : 0;
+        dayMeal.meals.reduce((mealTotal, mealItem) => 
+          mealTotal + (typeof mealItem.meal.price === 'number' && typeof mealItem.quantity === 'number' ? 
+            mealItem.meal.price * mealItem.quantity : 0), 0) : 0), 0) : 0;
   
   const programsCost = Array.isArray(programs) ? 
     programs.reduce((total, program) => 
@@ -101,12 +102,31 @@ const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({ data }) => {
               <UtensilsIcon className="h-4 w-4 text-primary" />
               <span>Étkezések</span>
             </div>
-            <div className="pl-6 space-y-1 text-sm">
-              <div className="text-muted-foreground">
-                {meals.length} napi étkezés kiválasztva
-              </div>
+            <div className="pl-6 space-y-2 text-sm">
+              {meals.map((dayMeal, dayIndex) => {
+                if (!dayMeal.meals || dayMeal.meals.length === 0) return null;
+                
+                return (
+                  <div key={dayIndex} className="space-y-1">
+                    <div className="text-xs text-muted-foreground font-medium">
+                      {format(dayMeal.date, 'MMM d.')}
+                    </div>
+                    {dayMeal.meals.map((mealItem, mealIndex) => (
+                      <div key={`${dayIndex}-${mealIndex}`} className="flex justify-between text-xs pl-2">
+                        <span>
+                          {mealItem.meal.name}
+                          {mealItem.quantity > 1 && (
+                            <span className="text-muted-foreground ml-1">× {mealItem.quantity}</span>
+                          )}
+                        </span>
+                        <span>{(mealItem.meal.price * mealItem.quantity).toLocaleString()} Ft</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
               {mealsCost > 0 && (
-                <div className="text-primary-foreground/80 font-medium">
+                <div className="text-primary-foreground/80 font-medium pt-1 border-t border-border">
                   {mealsCost.toLocaleString()} Ft
                 </div>
               )}

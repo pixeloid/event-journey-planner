@@ -2,17 +2,17 @@
 import React from 'react';
 import { MealOption } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { CupSodaIcon, SaladIcon, UtensilsCrossedIcon, ChefHatIcon } from 'lucide-react';
+import { CupSodaIcon, SaladIcon, UtensilsCrossedIcon, ChefHatIcon, MinusIcon, PlusIcon } from 'lucide-react';
 
 interface MealCardProps {
   meal: MealOption;
-  isSelected: boolean;
-  onToggle: () => void;
+  quantity: number;
+  onQuantityChange: (quantity: number) => void;
 }
 
-const MealCard: React.FC<MealCardProps> = ({ meal, isSelected, onToggle }) => {
+const MealCard: React.FC<MealCardProps> = ({ meal, quantity, onQuantityChange }) => {
   const getMealIcon = (type: string) => {
     switch (type) {
       case 'breakfast':
@@ -28,28 +28,27 @@ const MealCard: React.FC<MealCardProps> = ({ meal, isSelected, onToggle }) => {
     }
   };
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Prevent triggering when clicking directly on the checkbox
-    if ((e.target as HTMLElement).closest('[role="checkbox"]')) {
-      return;
-    }
-    onToggle();
+  const handleIncrease = () => {
+    onQuantityChange(quantity + 1);
   };
 
-  const handleCheckboxChange = (checked: boolean) => {
-    onToggle();
+  const handleDecrease = () => {
+    if (quantity > 0) {
+      onQuantityChange(quantity - 1);
+    }
   };
+
+  const isSelected = quantity > 0;
 
   return (
     <Card 
       className={cn(
-        "overflow-hidden cursor-pointer transition-all border",
+        "overflow-hidden transition-all border",
         isSelected && "ring-2 ring-primary border-primary"
       )}
-      onClick={handleCardClick}
     >
-      <CardContent className="p-6 flex flex-col h-full">
-        <div className="flex items-start justify-between mb-4">
+      <CardContent className="p-4 flex flex-col h-full">
+        <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-2">
             <div className={cn(
               "p-1.5 rounded-full",
@@ -57,20 +56,44 @@ const MealCard: React.FC<MealCardProps> = ({ meal, isSelected, onToggle }) => {
             )}>
               {getMealIcon(meal.type)}
             </div>
-            <h4 className="font-medium">{meal.name}</h4>
+            <h4 className="font-medium text-sm">{meal.name}</h4>
           </div>
-          <Checkbox 
-            checked={isSelected}
-            onCheckedChange={handleCheckboxChange}
-            className="data-[state=checked]:bg-primary"
-            onClick={(e) => e.stopPropagation()}
-          />
         </div>
         
-        <p className="text-sm text-muted-foreground mb-4">{meal.description}</p>
+        <p className="text-xs text-muted-foreground mb-3 flex-1">{meal.description}</p>
         
-        <div className="mt-auto">
-          <span className="font-semibold">{meal.price.toLocaleString()} Ft</span>
+        <div className="space-y-3">
+          <div className="font-semibold text-sm">{meal.price.toLocaleString()} Ft</div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Mennyiség:</span>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={handleDecrease}
+                disabled={quantity === 0}
+              >
+                <MinusIcon className="h-3 w-3" />
+              </Button>
+              <span className="text-sm font-medium w-8 text-center">{quantity}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={handleIncrease}
+              >
+                <PlusIcon className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+          
+          {quantity > 0 && (
+            <div className="text-sm font-medium text-primary">
+              Összesen: {(meal.price * quantity).toLocaleString()} Ft
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

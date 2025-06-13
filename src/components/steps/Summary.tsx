@@ -36,8 +36,9 @@ const Summary = ({ data }: { data: RegistrationData }) => {
   })();
   
   const mealsCost = Array.isArray(meals) ? meals.reduce((total, dayMeal) => 
-    total + (Array.isArray(dayMeal.meals) ? dayMeal.meals.reduce((sum, meal) => 
-      sum + (typeof meal.price === 'number' ? meal.price : 0), 0) : 0
+    total + (Array.isArray(dayMeal.meals) ? dayMeal.meals.reduce((sum, mealItem) => 
+      sum + (typeof mealItem.meal.price === 'number' && typeof mealItem.quantity === 'number' ? 
+        mealItem.meal.price * mealItem.quantity : 0), 0) : 0
     ), 0) : 0;
   
   const programsCost = Array.isArray(programs) ? programs.reduce((total, program) => 
@@ -72,7 +73,7 @@ const Summary = ({ data }: { data: RegistrationData }) => {
   }) : [];
   
   const totalSponsorContribution = sponsorContributions.reduce(
-    (total, sponsor) => total + sponsor.total, 0
+    (total,sponsor) => total + sponsor.total, 0
   );
 
   const remainingCost = Math.max(0, totalCost - totalSponsorContribution);
@@ -169,18 +170,23 @@ const Summary = ({ data }: { data: RegistrationData }) => {
           <Card>
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4">Étkezések</h3>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {meals.map((dayMeal, index) => (
-                  <div key={index} className="mb-4">
+                  <div key={index} className="space-y-2">
                     <h4 className="text-md font-semibold">
                       {dayMeal.date instanceof Date && !isNaN(dayMeal.date.getTime()) 
                         ? format(dayMeal.date, 'yyyy. MM. dd.') 
                         : `Nap ${index + 1}`}
                     </h4>
-                    {Array.isArray(dayMeal.meals) && dayMeal.meals.map((meal) => (
-                      <div key={meal.id} className="flex justify-between">
-                        <span>{meal.name}</span>
-                        <span>{(meal.price || 0).toLocaleString()} Ft</span>
+                    {Array.isArray(dayMeal.meals) && dayMeal.meals.map((mealItem, mealIndex) => (
+                      <div key={`${index}-${mealIndex}`} className="flex justify-between text-sm">
+                        <span>
+                          {mealItem.meal.name}
+                          {mealItem.quantity > 1 && (
+                            <span className="text-muted-foreground ml-1">× {mealItem.quantity}</span>
+                          )}
+                        </span>
+                        <span>{((mealItem.meal.price || 0) * (mealItem.quantity || 0)).toLocaleString()} Ft</span>
                       </div>
                     ))}
                   </div>

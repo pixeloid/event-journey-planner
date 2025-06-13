@@ -10,7 +10,7 @@ interface TotalSummaryProps {
 const TotalSummary: React.FC<TotalSummaryProps> = ({ selectedMeals }) => {
   const totalAmount = selectedMeals
     .flatMap(day => day.meals)
-    .reduce((sum, meal) => sum + meal.price, 0);
+    .reduce((sum, mealItem) => sum + (mealItem.meal.price * mealItem.quantity), 0);
 
   return (
     <div className="mt-8 p-4 bg-accent rounded-lg">
@@ -23,10 +23,15 @@ const TotalSummary: React.FC<TotalSummaryProps> = ({ selectedMeals }) => {
             <div key={format(dayMeals.date, 'yyyy-MM-dd')} className="pb-2 border-b border-border last:border-0">
               <div className="font-medium">{format(dayMeals.date, 'yyyy. MMMM d. (EEEE)')}</div>
               <div className="space-y-1 mt-1">
-                {dayMeals.meals.map(meal => (
-                  <div key={meal.id} className="flex justify-between text-sm">
-                    <span>{meal.name}</span>
-                    <span>{meal.price.toLocaleString()} Ft</span>
+                {dayMeals.meals.map((mealItem, index) => (
+                  <div key={`${mealItem.meal.id}-${index}`} className="flex justify-between text-sm">
+                    <span>
+                      {mealItem.meal.name}
+                      {mealItem.quantity > 1 && (
+                        <span className="text-muted-foreground ml-1">× {mealItem.quantity}</span>
+                      )}
+                    </span>
+                    <span>{(mealItem.meal.price * mealItem.quantity).toLocaleString()} Ft</span>
                   </div>
                 ))}
               </div>

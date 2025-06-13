@@ -1,3 +1,4 @@
+
 // Registration Form Types
 export type PersonalData = {
   firstName: string;
@@ -46,9 +47,14 @@ export type MealOption = {
   type: 'breakfast' | 'lunch' | 'dinner' | 'gala';
 };
 
+export type SelectedMealItem = {
+  meal: MealOption;
+  quantity: number;
+};
+
 export type SelectedMeal = {
   date: Date;
-  meals: MealOption[];
+  meals: SelectedMealItem[];
 };
 
 export type ProgramOption = {

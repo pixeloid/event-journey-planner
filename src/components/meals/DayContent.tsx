@@ -10,25 +10,26 @@ import { MEAL_OPTIONS } from './mealConstants';
 interface DayContentProps {
   day: Date;
   selectedMeals: SelectedMeal[];
-  onMealToggle: (day: Date, meal: MealOption) => void;
+  onMealQuantityChange: (day: Date, meal: MealOption, quantity: number) => void;
 }
 
-const DayContent: React.FC<DayContentProps> = ({ day, selectedMeals, onMealToggle }) => {
-  const isMealSelected = (mealId: string): boolean => {
+const DayContent: React.FC<DayContentProps> = ({ day, selectedMeals, onMealQuantityChange }) => {
+  const getMealQuantity = (mealId: string): number => {
     const daySelection = selectedMeals.find(item => 
       item.date instanceof Date && format(item.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
     );
     
-    return daySelection ? daySelection.meals.some(meal => meal.id === mealId) : false;
+    const mealItem = daySelection?.meals.find(item => item.meal.id === mealId);
+    return mealItem?.quantity || 0;
   };
 
   const dayMeals = selectedMeals.find(
     item => item.date instanceof Date && format(item.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
   )?.meals || [];
 
-  const handleMealToggle = (meal: MealOption) => {
-    console.log(`Toggling meal: ${meal.name} for day: ${format(day, 'yyyy-MM-dd')}`);
-    onMealToggle(day, meal);
+  const handleQuantityChange = (meal: MealOption, quantity: number) => {
+    console.log(`Changing quantity for meal: ${meal.name} to ${quantity} for day: ${format(day, 'yyyy-MM-dd')}`);
+    onMealQuantityChange(day, meal, quantity);
   };
 
   return (
@@ -43,15 +44,15 @@ const DayContent: React.FC<DayContentProps> = ({ day, selectedMeals, onMealToggl
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {MEAL_OPTIONS.map((meal) => {
-          const isSelected = isMealSelected(meal.id);
-          console.log(`Rendering meal: ${meal.name}, selected: ${isSelected}`);
+          const quantity = getMealQuantity(meal.id);
+          console.log(`Rendering meal: ${meal.name}, quantity: ${quantity}`);
           
           return (
             <MealCard
               key={meal.id}
               meal={meal}
-              isSelected={isSelected}
-              onToggle={() => handleMealToggle(meal)}
+              quantity={quantity}
+              onQuantityChange={(qty) => handleQuantityChange(meal, qty)}
             />
           );
         })}
