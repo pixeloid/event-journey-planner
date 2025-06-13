@@ -19,7 +19,13 @@ const DayContent: React.FC<DayContentProps> = ({ day, selectedMeals, onMealQuant
       item.date instanceof Date && format(item.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
     );
     
-    const mealItem = daySelection?.meals.find(item => item.meal.id === mealId);
+    if (!daySelection || !daySelection.meals || !Array.isArray(daySelection.meals)) {
+      return 0;
+    }
+    
+    const mealItem = daySelection.meals.find(item => 
+      item && item.meal && item.meal.id === mealId
+    );
     return mealItem?.quantity || 0;
   };
 
