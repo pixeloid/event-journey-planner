@@ -86,14 +86,20 @@ type ProgramsProps = {
 
 const Programs: React.FC<ProgramsProps> = ({ selectedPrograms = [], updatePrograms }) => {
   const handleProgramToggle = (program: ProgramOption) => {
+    console.log('Toggling program:', program.name, 'Current selected:', selectedPrograms);
+    
     const isSelected = selectedPrograms.some(p => p.id === program.id);
     
     if (isSelected) {
       // Remove program if already selected
-      updatePrograms(selectedPrograms.filter(p => p.id !== program.id));
+      const newPrograms = selectedPrograms.filter(p => p.id !== program.id);
+      console.log('Removing program, new list:', newPrograms);
+      updatePrograms(newPrograms);
     } else {
       // Add program
-      updatePrograms([...selectedPrograms, program]);
+      const newPrograms = [...selectedPrograms, program];
+      console.log('Adding program, new list:', newPrograms);
+      updatePrograms(newPrograms);
     }
   };
   
@@ -102,8 +108,12 @@ const Programs: React.FC<ProgramsProps> = ({ selectedPrograms = [], updateProgra
   };
 
   const calculateTotalPrice = () => {
-    return selectedPrograms ? selectedPrograms.reduce((sum, program) => sum + program.price, 0) : 0;
+    const total = selectedPrograms ? selectedPrograms.reduce((sum, program) => sum + program.price, 0) : 0;
+    console.log('Calculated total price for programs:', total);
+    return total;
   };
+
+  console.log('Programs component rendering with selectedPrograms:', selectedPrograms);
 
   return (
     <motion.div 
