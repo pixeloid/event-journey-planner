@@ -32,27 +32,35 @@ const RoomTypeSelector: React.FC<RoomTypeSelectorProps> = ({
     return Math.round(price / guests);
   };
 
+  const handleRoomClick = (roomId: string) => {
+    console.log('Room clicked:', roomId);
+    onRoomTypeChange(roomId);
+  };
+
   return (
     <div className="grid grid-cols-1 gap-3">
       {accommodation.roomTypes.map((room) => {
         const pricePerPerson = calculatePricePerPerson(room, numberOfGuests);
         const isUnderOccupied = numberOfGuests < room.capacity && room.capacity > 1;
         const price = typeof room.pricePerNight === 'number' ? room.pricePerNight : 0;
+        const isSelected = selectedRoomType?.id === room.id;
+        
+        console.log('Rendering room:', room.id, 'selected:', isSelected, 'price:', price);
         
         return (
           <div
             key={room.id}
             className={cn(
               "cursor-pointer border rounded-lg p-4 bg-background hover:bg-accent/50 transition-colors",
-              selectedRoomType?.id === room.id && "ring-2 ring-primary"
+              isSelected && "ring-2 ring-primary bg-accent"
             )}
-            onClick={() => onRoomTypeChange(room.id)}
+            onClick={() => handleRoomClick(room.id)}
           >
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
                   <span className="font-medium">{room.name}</span>
-                  {selectedRoomType?.id === room.id && (
+                  {isSelected && (
                     <CheckIcon className="h-4 w-4 text-primary" />
                   )}
                 </div>

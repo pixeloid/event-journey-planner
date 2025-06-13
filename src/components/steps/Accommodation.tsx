@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { SelectedAccommodation } from '@/lib/types';
@@ -47,6 +48,10 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
     }
   }, [data?.accommodation, bedTypeFilter]);
 
+  useEffect(() => {
+    console.log('Accommodation data changed:', data);
+  }, [data]);
+
   const filterRoomTypes = (roomTypes) => {
     if (!roomTypes) return [];
     
@@ -63,10 +68,12 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
   };
 
   const handleDateChange = (range: { from: Date | null; to: Date | null }) => {
+    console.log('Date range changed:', range);
     setDateRange(range);
     
     if (range.from && range.to) {
       const nights = differenceInDays(range.to, range.from);
+      console.log('Calculated nights:', nights);
       updateData({ 
         checkIn: range.from,
         checkOut: range.to,
@@ -89,10 +96,12 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
         checkOut: range.to,
         numberOfNights: 0,
       });
+      setSelectedAccommodationId('');
     }
   };
 
   const handleAccommodationChange = (accommodationId: string) => {
+    console.log('Accommodation changed:', accommodationId);
     setSelectedAccommodationId(accommodationId);
     const selectedAccommodation = ACCOMMODATIONS.find(acc => acc.id === accommodationId) || null;
     
@@ -101,7 +110,7 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
     
     updateData({ 
       accommodation: selectedAccommodation,
-      roomType: null,
+      roomType: null, // Reset room selection when accommodation changes
       numberOfGuests: 1,
       numberOfNights: nights
     });
@@ -112,23 +121,30 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
   };
 
   const handleRoomTypeChange = (roomTypeId: string) => {
+    console.log('Room type changed:', roomTypeId);
     if (!data?.accommodation) return;
     
     const selectedRoomType = data.accommodation.roomTypes.find(room => room.id === roomTypeId) || null;
+    console.log('Selected room type:', selectedRoomType);
     
     // Reset guest count to 1 or maintain current if it's valid for the new room type
-    const newGuestCount = !data.numberOfGuests || data.numberOfGuests > selectedRoomType?.capacity 
+    const newGuestCount = !data.numberOfGuests || (selectedRoomType && data.numberOfGuests > selectedRoomType.capacity) 
       ? 1 
       : data.numberOfGuests;
     
+    const nights = dateRange.from && dateRange.to ? differenceInDays(dateRange.to, dateRange.from) : 0;
+    
     updateData({ 
       roomType: selectedRoomType,
-      numberOfGuests: newGuestCount
+      numberOfGuests: newGuestCount,
+      numberOfNights: nights
     });
   };
 
   const handleGuestsChange = (value: string) => {
-    updateData({ numberOfGuests: parseInt(value) });
+    const guestCount = parseInt(value);
+    console.log('Guest count changed:', guestCount);
+    updateData({ numberOfGuests: guestCount });
   };
 
   // Calculate max guests based on selected room type

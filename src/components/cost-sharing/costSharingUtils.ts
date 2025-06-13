@@ -7,6 +7,8 @@ export const calculateAmount = (
   field: string,
   totalAmount: number = 0
 ) => {
+  console.log('calculateAmount called with:', { distributions, field, totalAmount });
+  
   if (!Array.isArray(distributions) || distributions.length === 0 || totalAmount <= 0) {
     return {
       amountForSponsors: [],
@@ -22,7 +24,9 @@ export const calculateAmount = (
       return 0;
     }
     const coverage = dist[field];
-    return (coverage / 100) * totalAmount;
+    const amount = (coverage / 100) * totalAmount;
+    console.log(`Sponsor ${dist.sponsorCompany?.name || 'Unknown'} covers ${coverage}% of ${field}: ${amount} Ft`);
+    return amount;
   });
   
   // Calculate total amount covered by sponsors
@@ -31,6 +35,8 @@ export const calculateAmount = (
   // Calculate amount and percentage for self
   const amountForSelf = Math.max(0, totalAmount - totalCoveredBySponsors);
   const percentageForSelf = totalAmount > 0 ? Math.round((amountForSelf / totalAmount) * 100) : 100;
+  
+  console.log('calculateAmount result:', { amountForSponsors, amountForSelf, percentageForSelf });
   
   return {
     amountForSponsors,
@@ -48,11 +54,13 @@ export const calculateTotalPerSponsor = (
   mealsAmounts: { amountForSponsors: number[] } = { amountForSponsors: [] },
   programsAmounts: { amountForSponsors: number[] } = { amountForSponsors: [] }
 ) => {
+  console.log('calculateTotalPerSponsor called with:', { distributions, accommodationAmounts, mealsAmounts, programsAmounts });
+  
   if (!Array.isArray(distributions) || distributions.length === 0) {
     return [];
   }
 
-  return distributions.map((_, index) => {
+  const totals = distributions.map((_, index) => {
     const accommodationAmount = Array.isArray(accommodationAmounts.amountForSponsors) ? 
       (accommodationAmounts.amountForSponsors[index] || 0) : 0;
     
@@ -62,8 +70,14 @@ export const calculateTotalPerSponsor = (
     const programsAmount = Array.isArray(programsAmounts.amountForSponsors) ? 
       (programsAmounts.amountForSponsors[index] || 0) : 0;
     
-    return accommodationAmount + mealsAmount + programsAmount;
+    const total = accommodationAmount + mealsAmount + programsAmount;
+    console.log(`Sponsor ${index}: accommodation: ${accommodationAmount}, meals: ${mealsAmount}, programs: ${programsAmount}, total: ${total}`);
+    
+    return total;
   });
+  
+  console.log('calculateTotalPerSponsor result:', totals);
+  return totals;
 };
 
 /**
@@ -74,9 +88,11 @@ export const updateSponsorContributions = (distributions = [],
   mealsTotal = 0, 
   programsTotal = 0) => {
   
+  console.log('updateSponsorContributions called with:', { distributions, accommodationTotal, mealsTotal, programsTotal });
+  
   if (!Array.isArray(distributions)) return [];
   
-  return distributions.map(dist => {
+  const updated = distributions.map(dist => {
     if (!dist || !dist.sponsorCompany) return dist;
     
     // Safely get percentages with fallbacks to 0
@@ -89,6 +105,13 @@ export const updateSponsorContributions = (distributions = [],
     const mealsAmount = (mealsPercent / 100) * mealsTotal;
     const programsAmount = (programsPercent / 100) * programsTotal;
     const totalAmount = accommodationAmount + mealsAmount + programsAmount;
+    
+    console.log(`Updated contributions for ${dist.sponsorCompany.name}:`, {
+      accommodationAmount,
+      mealsAmount,
+      programsAmount,
+      totalAmount
+    });
     
     // Create a new sponsorCompany object with updated contributions
     const updatedCompany = {
@@ -107,4 +130,7 @@ export const updateSponsorContributions = (distributions = [],
       sponsorCompany: updatedCompany
     };
   });
+  
+  console.log('updateSponsorContributions result:', updated);
+  return updated;
 };
