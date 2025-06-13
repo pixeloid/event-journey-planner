@@ -1,15 +1,15 @@
 
 import React from 'react';
 import { format } from 'date-fns';
-import { MealOption } from '@/lib/types';
+import { SelectedMealItem } from '@/lib/types';
 
 interface DailySummaryProps {
   date: Date;
-  selectedMeals: MealOption[];
+  selectedMeals: SelectedMealItem[];
 }
 
 const DailySummary: React.FC<DailySummaryProps> = ({ date, selectedMeals }) => {
-  const totalPrice = selectedMeals.reduce((sum, meal) => sum + meal.price, 0);
+  const totalPrice = selectedMeals.reduce((sum, mealItem) => sum + (mealItem.meal.price * mealItem.quantity), 0);
 
   return (
     <div className="mt-8">
@@ -17,10 +17,15 @@ const DailySummary: React.FC<DailySummaryProps> = ({ date, selectedMeals }) => {
         <div className="p-4 bg-accent rounded-lg">
           <h4 className="font-medium mb-2">Kiválasztott étkezések erre a napra:</h4>
           <div className="space-y-2">
-            {selectedMeals.map(meal => (
-              <div key={meal.id} className="flex justify-between">
-                <span>{meal.name} - {meal.description}</span>
-                <span>{meal.price.toLocaleString()} Ft</span>
+            {selectedMeals.map((mealItem, index) => (
+              <div key={`${mealItem.meal.id}-${index}`} className="flex justify-between">
+                <span>
+                  {mealItem.meal.name} - {mealItem.meal.description}
+                  {mealItem.quantity > 1 && (
+                    <span className="text-muted-foreground ml-1">× {mealItem.quantity}</span>
+                  )}
+                </span>
+                <span>{(mealItem.meal.price * mealItem.quantity).toLocaleString()} Ft</span>
               </div>
             ))}
             <div className="pt-2 mt-2 border-t border-border flex justify-between font-medium">
