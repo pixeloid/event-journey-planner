@@ -26,6 +26,11 @@ const DayContent: React.FC<DayContentProps> = ({ day, selectedMeals, onMealToggl
     item => item.date instanceof Date && format(item.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
   )?.meals || [];
 
+  const handleMealToggle = (meal: MealOption) => {
+    console.log(`Toggling meal: ${meal.name} for day: ${format(day, 'yyyy-MM-dd')}`);
+    onMealToggle(day, meal);
+  };
+
   return (
     <TabsContent 
       value={format(day, 'yyyy-MM-dd')}
@@ -37,14 +42,19 @@ const DayContent: React.FC<DayContentProps> = ({ day, selectedMeals, onMealToggl
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        {MEAL_OPTIONS.map((meal) => (
-          <MealCard
-            key={meal.id}
-            meal={meal}
-            isSelected={isMealSelected(meal.id)}
-            onToggle={() => onMealToggle(day, meal)}
-          />
-        ))}
+        {MEAL_OPTIONS.map((meal) => {
+          const isSelected = isMealSelected(meal.id);
+          console.log(`Rendering meal: ${meal.name}, selected: ${isSelected}`);
+          
+          return (
+            <MealCard
+              key={meal.id}
+              meal={meal}
+              isSelected={isSelected}
+              onToggle={() => handleMealToggle(meal)}
+            />
+          );
+        })}
       </div>
       
       <DailySummary date={day} selectedMeals={dayMeals} />

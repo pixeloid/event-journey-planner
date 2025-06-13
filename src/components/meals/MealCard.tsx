@@ -28,13 +28,25 @@ const MealCard: React.FC<MealCardProps> = ({ meal, isSelected, onToggle }) => {
     }
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Prevent triggering when clicking directly on the checkbox
+    if ((e.target as HTMLElement).closest('[role="checkbox"]')) {
+      return;
+    }
+    onToggle();
+  };
+
+  const handleCheckboxChange = (checked: boolean) => {
+    onToggle();
+  };
+
   return (
     <Card 
       className={cn(
         "overflow-hidden cursor-pointer transition-all border",
         isSelected && "ring-2 ring-primary border-primary"
       )}
-      onClick={onToggle}
+      onClick={handleCardClick}
     >
       <CardContent className="p-6 flex flex-col h-full">
         <div className="flex items-start justify-between mb-4">
@@ -49,8 +61,9 @@ const MealCard: React.FC<MealCardProps> = ({ meal, isSelected, onToggle }) => {
           </div>
           <Checkbox 
             checked={isSelected}
-            onCheckedChange={onToggle}
+            onCheckedChange={handleCheckboxChange}
             className="data-[state=checked]:bg-primary"
+            onClick={(e) => e.stopPropagation()}
           />
         </div>
         

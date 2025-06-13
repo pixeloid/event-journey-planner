@@ -70,6 +70,8 @@ const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateData, allD
   });
 
   const handleMealToggle = (day: Date, meal: MealOption) => {
+    console.log(`Handling meal toggle for ${meal.name} on ${format(day, 'yyyy-MM-dd')}`);
+    
     const updatedMeals = [...selectedMeals];
     const dayIndex = updatedMeals.findIndex(item => 
       item.date instanceof Date && format(item.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
@@ -80,12 +82,15 @@ const Meals: React.FC<MealsProps> = ({ data, checkIn, checkOut, updateData, allD
       
       if (existingMealIndex >= 0) {
         // Remove meal if already selected
+        console.log(`Removing meal: ${meal.name}`);
         updatedMeals[dayIndex].meals = updatedMeals[dayIndex].meals.filter(m => m.id !== meal.id);
       } else {
         // Add meal
+        console.log(`Adding meal: ${meal.name}`);
         updatedMeals[dayIndex].meals.push(meal);
       }
       
+      console.log(`Updated meals for day:`, updatedMeals[dayIndex]);
       updateData(updatedMeals);
     }
   };
