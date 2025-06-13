@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { SelectedAccommodation } from '@/lib/types';
@@ -74,20 +73,23 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
     if (range.from && range.to) {
       const nights = differenceInDays(range.to, range.from);
       console.log('Calculated nights:', nights);
-      updateData({ 
+      
+      // Update with proper accommodation structure
+      const updatedData = {
         checkIn: range.from,
         checkOut: range.to,
-        numberOfNights: nights
-      });
+        numberOfNights: nights,
+        // Keep existing accommodation and room selection if available
+        accommodation: data?.accommodation || null,
+        roomType: data?.roomType || null,
+        numberOfGuests: data?.numberOfGuests || 1
+      };
+      
+      updateData(updatedData);
       
       // If dates change and accommodations were previously selected, maintain the selection
       if (selectedAccommodationId && data?.accommodation) {
-        // Keep current accommodation but recalculate nights
-        updateData({
-          accommodation: data.accommodation,
-          roomType: data.roomType,
-          numberOfNights: nights
-        });
+        setSelectedAccommodationId(data.accommodation.id);
       }
     } else {
       // Reset accommodation selection if dates are cleared
@@ -95,6 +97,9 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
         checkIn: range.from,
         checkOut: range.to,
         numberOfNights: 0,
+        accommodation: null,
+        roomType: null,
+        numberOfGuests: 1
       });
       setSelectedAccommodationId('');
     }
@@ -112,7 +117,9 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
       accommodation: selectedAccommodation,
       roomType: null, // Reset room selection when accommodation changes
       numberOfGuests: 1,
-      numberOfNights: nights
+      numberOfNights: nights,
+      checkIn: dateRange.from,
+      checkOut: dateRange.to
     });
     
     if (selectedAccommodation) {
@@ -135,16 +142,30 @@ const Accommodation: React.FC<AccommodationProps> = ({ data, updateData }) => {
     const nights = dateRange.from && dateRange.to ? differenceInDays(dateRange.to, dateRange.from) : 0;
     
     updateData({ 
+      accommodation: data.accommodation,
       roomType: selectedRoomType,
       numberOfGuests: newGuestCount,
-      numberOfNights: nights
+      numberOfNights: nights,
+      checkIn: dateRange.from,
+      checkOut: dateRange.to
     });
   };
 
   const handleGuestsChange = (value: string) => {
     const guestCount = parseInt(value);
     console.log('Guest count changed:', guestCount);
-    updateData({ numberOfGuests: guestCount });
+    
+    // Ensure we maintain all existing data when updating guest count
+    const nights = dateRange.from && dateRange.to ? differenceInDays(dateRange.to, dateRange.from) : 0;
+    
+    updateData({ 
+      accommodation: data?.accommodation || null,
+      roomType: data?.roomType || null,
+      numberOfGuests: guestCount,
+      numberOfNights: nights,
+      checkIn: dateRange.from,
+      checkOut: dateRange.to
+    });
   };
 
   // Calculate max guests based on selected room type

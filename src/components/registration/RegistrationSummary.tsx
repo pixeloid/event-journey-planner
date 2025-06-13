@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { RegistrationData } from '@/lib/types';
 import { format } from 'date-fns';
-import { Building2Icon, BedIcon, UtensilsIcon, CalendarIcon, BadgeEuroIcon } from 'lucide-react';
+import { Building2Icon, BedIcon, UtensilsIcon, CalendarIcon, BadgeEuroIcon, UsersIcon } from 'lucide-react';
 
 interface RegistrationSummaryProps {
   data: RegistrationData;
@@ -15,14 +15,8 @@ const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({ data }) => {
 
   // Calculate costs with safe checks for null/undefined
   const accommodationCost = (() => {
-    if (!accommodation?.roomType?.pricePerNight) return 0;
-    
-    const nights = accommodation.numberOfNights || 
-      (accommodation.checkIn && accommodation.checkOut ? 
-        Math.max(1, Math.floor((accommodation.checkOut.getTime() - accommodation.checkIn.getTime()) / (1000 * 60 * 60 * 24))) : 
-        0);
-    
-    return accommodation.roomType.pricePerNight * nights;
+    if (!accommodation?.roomType?.pricePerNight || !accommodation?.numberOfNights) return 0;
+    return accommodation.roomType.pricePerNight * accommodation.numberOfNights;
   })();
   
   const mealsCost = Array.isArray(meals) ? 
@@ -45,25 +39,37 @@ const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({ data }) => {
     return format(date, 'MMM d.');
   };
 
+  // Calculate per person cost for accommodation
+  const accommodationCostPerPerson = accommodation?.numberOfGuests && accommodation.numberOfGuests > 1 
+    ? Math.round(accommodationCost / accommodation.numberOfGuests) 
+    : accommodationCost;
+
   return (
     <Card className="sticky top-6 overflow-auto max-h-[calc(100vh-4rem)]">
       <CardContent className="p-4">
         <h3 className="font-semibold mb-3 text-lg">Foglalási információk</h3>
         
-        {accommodation?.accommodation && (
+        {accommodation?.accommodation && accommodation?.roomType && (
           <div className="mb-4">
             <div className="flex items-center gap-2 font-medium text-sm mb-2">
               <Building2Icon className="h-4 w-4 text-primary" />
               <span>Szállás</span>
             </div>
             <div className="pl-6 space-y-1 text-sm">
-              <div>{accommodation.accommodation.name}</div>
-              {accommodation.roomType && (
-                <div className="flex items-center gap-1">
-                  <BedIcon className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-muted-foreground">{accommodation.roomType.name}</span>
-                </div>
-              )}
+              <div className="font-medium">{accommodation.accommodation.name}</div>
+              <div className="flex items-center gap-1">
+                <BedIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">{accommodation.roomType.name}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <UsersIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">
+                  {accommodation.numberOfGuests || 1} fő
+                  {accommodation.roomType.capacity !== accommodation.numberOfGuests && 
+                    ` (${accommodation.roomType.capacity} fős szobában)`
+                  }
+                </span>
+              </div>
               {accommodation.checkIn && accommodation.checkOut && (
                 <div className="flex items-center gap-1">
                   <CalendarIcon className="h-3 w-3 text-muted-foreground" />
@@ -72,12 +78,17 @@ const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({ data }) => {
                   </span>
                 </div>
               )}
-              {accommodation.numberOfNights > 0 && accommodation.roomType?.pricePerNight && (
+              {accommodation.numberOfNights > 0 && (
                 <div className="text-primary-foreground/80 font-medium">
                   {accommodationCost.toLocaleString()} Ft
                   <span className="text-xs text-muted-foreground ml-1">
                     ({accommodation.roomType.pricePerNight.toLocaleString()} Ft × {accommodation.numberOfNights} éj)
                   </span>
+                  {accommodation.numberOfGuests && accommodation.numberOfGuests > 1 && (
+                    <div className="text-xs text-muted-foreground">
+                      {accommodationCostPerPerson.toLocaleString()} Ft / fő
+                    </div>
+                  )}
                 </div>
               )}
             </div>
